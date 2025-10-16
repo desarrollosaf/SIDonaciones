@@ -19,6 +19,10 @@ export const routes: Routes = [
         loadComponent: () => import('./views/pages/citas/citas.component').then(c => c.CitasComponent)
       },
       {
+        path: 'donacion',
+        loadComponent: () => import('./views/pages/donaciones/donaciones.component').then(c => c.DonacionesComponent)
+      },
+      {
         path: 'reportes',
         canActivateChild: [UserAccessGuard],
         loadChildren: () => import('./views/pages/reportes/reportes.route')

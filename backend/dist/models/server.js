@@ -57,7 +57,8 @@ class Server {
             const publicPaths = [
                 '/api/user/login',
                 '/api/citas/getcitasfecha/',
-                '/api/citas/exelgeneral/'
+                '/api/citas/exelgeneral/',
+                '/api/donacion/savedonacion/'
             ];
             const isPublic = publicPaths.some(path => req.originalUrl.startsWith(path));
             if (isPublic) {
