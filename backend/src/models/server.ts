@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import { verifyToken } from '../middlewares/auth';
 import routeCitas from "../routes/citas";
+import routeDonacion from "../routes/donaciones";
 class Server {
 
     private app: Application
@@ -35,6 +36,7 @@ class Server {
         this.app.use(rcombos);
         this.app.use(routeUser);
         this.app.use(routeCitas);
+        this.app.use(routeDonacion);
 
     }
 
