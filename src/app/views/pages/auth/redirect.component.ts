@@ -21,7 +21,7 @@ export class RedirectComponent implements OnInit {
     if (role == 'JS') {
       this.router.navigate(['/reportes']);
     } else {
-      this.router.navigate(['/citas']);
+      this.router.navigate(['/registro']);
     }
   }
 }
