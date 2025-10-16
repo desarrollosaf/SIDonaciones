@@ -19,7 +19,7 @@ const user_1 = __importDefault(require("../models/user"));
 const s_usuario_1 = __importDefault(require("../models/saf/s_usuario"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const s_usuario_2 = __importDefault(require("../models/saf/s_usuario"));
-const citas_1 = __importDefault(require("../models/citas"));
+const donaciones_1 = __importDefault(require("../models/donaciones"));
 const ReadUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const listUser = yield users_1.default.findAll();
     return res.json({
@@ -34,7 +34,6 @@ const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     let user = null;
     let bandera = true;
     if (rfc.startsWith('VC')) {
-        // console.log('admin admin');
         bandera = false;
         user = yield user_1.default.findOne({
             where: { name: rfc },
@@ -59,32 +58,6 @@ const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
                 msg: `Este rfc es de un asesor ${rfc}`
             });
         }
-        // const Validacion = await dp_fum_datos_generales.findOne({
-        //     where: { f_rfc: rfc },
-        //     attributes: ["f_curp"]
-        // });
-        // if (!Validacion?.f_curp) {
-        //     return res.status(404).json({ msg: "Usuario no encontrado o CURP inválida" });
-        // }
-        // const curp = Validacion.f_curp;
-        // const sexo = curp[10];
-        // const yy = parseInt(curp.slice(4, 6));
-        // const mm = parseInt(curp.slice(6, 8)) - 1;
-        // const dd = parseInt(curp.slice(8, 10));
-        // const currentYY = new Date().getFullYear() % 100;
-        // const yyyy = yy > currentYY ? 1900 + yy : 2000 + yy;
-        // const fechaNac = new Date(yyyy, mm, dd);
-        // const hoy = new Date();
-        // let edad = hoy.getFullYear() - fechaNac.getFullYear();
-        // if (
-        //     hoy.getMonth() < fechaNac.getMonth() ||
-        //     (hoy.getMonth() === fechaNac.getMonth() && hoy.getDate() < fechaNac.getDate())
-        // ) {
-        //     edad--;
-        // }
-        // if (sexo !== "H" || edad < 40) {
-        //     return res.status(400).json({ msg: "Usuario no válido" });
-        // }
         user = yield users_1.default.findOne({
             where: { rfc: rfc },
             include: [
@@ -108,17 +81,9 @@ const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
             msg: `Password Incorrecto => ${password}`
         });
     }
-    const totalCitas = yield citas_1.default.count();
-    const citaUser = yield citas_1.default.findOne({
+    const donacionUser = yield donaciones_1.default.findOne({
         where: { rfc: rfc }
     });
-    if (totalCitas >= 500) {
-        if (!citaUser) {
-            return res.status(416).json({
-                msg: "Ya no hay lugares disponibles."
-            });
-        }
-    }
     const accessToken = jsonwebtoken_1.default.sign({ rfc: rfc }, process.env.SECRET_KEY || 'TSE-Poder-legislativo', { expiresIn: '2h' });
     res.cookie('accessToken', accessToken, {
         httpOnly: true,

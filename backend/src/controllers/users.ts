@@ -8,7 +8,7 @@ import SUsuario from '../models/saf/s_usuario';
 import dotenv from 'dotenv';
 import { dp_fum_datos_generales } from '../models/fun/dp_fum_datos_generales'
 import Cita from '../models/citas'
-
+import Donaciones from '../models/donaciones'
 export const ReadUser = async (req: Request, res: Response): Promise<any> => {
     const listUser = await User.findAll();
     return res.json({
@@ -29,7 +29,6 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
 
 
     if (rfc.startsWith('VC')) {
-        // console.log('admin admin');
         bandera = false;
         user = await UserBase.findOne({
             where: { name: rfc },
@@ -54,43 +53,7 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
                 msg: `Este rfc es de un asesor ${rfc}`
             });
         }
-        // const Validacion = await dp_fum_datos_generales.findOne({
-        //     where: { f_rfc: rfc },
-        //     attributes: ["f_curp"]
-        // });
-
-        // if (!Validacion?.f_curp) {
-        //     return res.status(404).json({ msg: "Usuario no encontrado o CURP inválida" });
-        // }
-
-        // const curp = Validacion.f_curp;
-
-
-        // const sexo = curp[10];
-
-        // const yy = parseInt(curp.slice(4, 6));
-        // const mm = parseInt(curp.slice(6, 8)) - 1;
-        // const dd = parseInt(curp.slice(8, 10));
-
-
-        // const currentYY = new Date().getFullYear() % 100;
-        // const yyyy = yy > currentYY ? 1900 + yy : 2000 + yy;
-
-        // const fechaNac = new Date(yyyy, mm, dd);
-
-
-        // const hoy = new Date();
-        // let edad = hoy.getFullYear() - fechaNac.getFullYear();
-        // if (
-        //     hoy.getMonth() < fechaNac.getMonth() ||
-        //     (hoy.getMonth() === fechaNac.getMonth() && hoy.getDate() < fechaNac.getDate())
-        // ) {
-        //     edad--;
-        // }
-
-        // if (sexo !== "H" || edad < 40) {
-        //     return res.status(400).json({ msg: "Usuario no válido" });
-        // }
+ 
         user = await User.findOne({
             where: { rfc: rfc },
             include: [
@@ -112,24 +75,16 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
 
     }
 
-
-
     if (!passwordValid) {
         return res.status(402).json({
             msg: `Password Incorrecto => ${password}`
         })
     }
-    const totalCitas = await Cita.count();
-    const citaUser = await Cita.findOne({
+ 
+    const donacionUser = await Donaciones.findOne({
         where: { rfc: rfc }
     });
-    if (totalCitas >= 500) {
-        if (!citaUser) {
-            return res.status(416).json({
-                msg: "Ya no hay lugares disponibles."
-            });
-        }
-    }
+
 
     const accessToken = jwt.sign(
         { rfc: rfc },
