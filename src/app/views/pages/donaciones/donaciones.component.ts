@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { UserService } from '../../../core/services/user.service';
 import { RouterModule } from '@angular/router';
+import { RegistroService } from '../../../service/registro.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-donaciones',
@@ -15,6 +17,7 @@ export class DonacionesComponent {
   registroForm: FormGroup;
 nombreCompleto:any;
  currentUser: any;
+ public _registroService = inject(RegistroService);
 
   constructor(private fb: FormBuilder, private _userService: UserService) {
     this.registroForm = this.fb.group({
@@ -31,7 +34,7 @@ nombreCompleto:any;
     });
   }
 
-  
+
   ngOnInit(): void {
     this.currentUser = this._userService.currentUserValue;
     this.nombreCompleto = this.currentUser.nombre.Nombre;
@@ -40,12 +43,30 @@ nombreCompleto:any;
 
 
  enviardatos() {
-    if (this.registroForm.invalid) {
-      this.registroForm.markAllAsTouched();
-      return;
-    }
+    // if (this.registroForm.invalid) {
+    //   this.registroForm.markAllAsTouched();
+    //   return;
+    // }
+console.log(this.registroForm.value.correo);
+  const datos = {
+      correo: this.registroForm.value.correo,
+      rfc: this.currentUser.rfc,
+      telefono: this.registroForm.value.telefono,
+      donativo: this.registroForm.value.cantidad
+    };
+    console.log(datos);
+   this._registroService.saveRegistro(datos).subscribe({
+      next: (response: any) => {
+        console.log(response);
+        console.log('Formulario enviado:');
+      },
+      error: (e: HttpErrorResponse) => {
+        const msg = e.error?.msg || 'Error desconocido';
+        console.error('Error del servidor:', msg);
+      }
+    });
 
-    console.log('Formulario enviado:', this.registroForm.value);
+    
   }
 
 }
