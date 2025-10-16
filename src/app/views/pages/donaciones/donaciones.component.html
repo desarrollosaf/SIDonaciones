@@ -6,93 +6,98 @@
             <div class="card-body">
 
                 @if(!mostrarForm){
- <div class="container py-4">
-  <div class="row w-100 mx-0 auth-page">
-    <div class="mx-auto col-12 col-md-11 col-lg-12" style="max-width: 900px;">
-      <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white text-center">
-          <h5 class="mb-0">Ingresa tus datos</h5>
-        </div>
-        <div class="card-body">
-          <div class="mb-4">
-            <label class="form-label fw-bold">Nombre completo</label>
-            <div class="form-control-plaintext border rounded p-2 bg-light text-dark">
-              {{ nombreCompleto }}
-            </div>
-          </div>
+                <div class="container py-4">
+                    <div class="row w-100 mx-0 auth-page">
+                        <div class="mx-auto col-12 col-md-11 col-lg-12" style="max-width: 900px;">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-primary text-white text-center">
+                                    <h5 class="mb-0">Ingresa tus datos</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">Nombre completo</label>
+                                        <div class="form-control-plaintext border rounded p-2 bg-light text-dark">
+                                            {{ nombreCompleto }}
+                                        </div>
+                                    </div>
 
-          <form [formGroup]="registroForm" (ngSubmit)="enviardatos()">
+                                    <form [formGroup]="registroForm" (ngSubmit)="enviardatos()">
 
-            <!-- Correo -->
-            <div class="input-group mb-3">
-              <span class="input-group-text">
-                <i class="bi bi-envelope"></i>
-              </span>
-              <input
-                id="correo"
-                type="email"
-                class="form-control"
-                formControlName="correo"
-                placeholder="ejemplo@correo.com"
-                [ngClass]="{ 'is-invalid': registroForm.get('correo')?.touched && registroForm.get('correo')?.invalid }"
-              />
-            </div>
-            <div class="invalid-feedback d-block" *ngIf="registroForm.get('correo')?.touched && registroForm.get('correo')?.invalid">
-              <div *ngIf="registroForm.get('correo')?.errors?.['required']">El correo es obligatorio.</div>
-              <div *ngIf="registroForm.get('correo')?.errors?.['email']">El correo no es válido.</div>
-            </div>
+                                        <!-- Correo -->
+                                        <div class="mb-1">
+                                            <label for="correo" class="form-label fw-semibold">Correo*:</label>
+                                        </div>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-envelope"></i>
+                                            </span>
+                                            <input id="correo" type="email" class="form-control"
+                                                formControlName="correo" placeholder="ejemplo@correo.com"
+                                                [ngClass]="{ 'is-invalid': registroForm.get('correo')?.touched && registroForm.get('correo')?.invalid }" />
+                                        </div>
+                                        <div class="invalid-feedback d-block"
+                                            *ngIf="registroForm.get('correo')?.touched && registroForm.get('correo')?.invalid">
+                                            <div *ngIf="registroForm.get('correo')?.errors?.['required']">El correo es
+                                                obligatorio.</div>
+                                            <div *ngIf="registroForm.get('correo')?.errors?.['email']">El correo no es
+                                                válido.</div>
+                                        </div>
 
-            <!-- Teléfono -->
-            <div class="input-group mb-3">
-              <span class="input-group-text">
-                <i class="bi bi-telephone"></i>
-              </span>
-              <input
-                id="telefono"
-                type="text"
-                class="form-control"
-                formControlName="telefono"
-                placeholder="Solo números"
-                [ngClass]="{ 'is-invalid': registroForm.get('telefono')?.touched && registroForm.get('telefono')?.invalid }"
-              />
-            </div>
-            <div class="invalid-feedback d-block" *ngIf="registroForm.get('telefono')?.touched && registroForm.get('telefono')?.invalid">
-              <div *ngIf="registroForm.get('telefono')?.errors?.['required']">El teléfono es obligatorio.</div>
-              <div *ngIf="registroForm.get('telefono')?.errors?.['pattern']">Solo se permiten números.</div>
-            </div>
+                                        <!-- Teléfono -->
+                                        <div class="mb-1">
+                                            <label for="telefono" class="form-label fw-semibold">Teléfono*:</label>
+                                        </div>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-telephone"></i>
+                                            </span>
+                                            <input id="telefono" type="text" class="form-control"
+                                                formControlName="telefono" placeholder="Solo números"
+                                                [ngClass]="{ 'is-invalid': registroForm.get('telefono')?.touched && registroForm.get('telefono')?.invalid }" />
+                                        </div>
+                                        <div class="invalid-feedback d-block"
+                                            *ngIf="registroForm.get('telefono')?.touched && registroForm.get('telefono')?.invalid">
+                                            <div *ngIf="registroForm.get('telefono')?.errors?.['required']">El teléfono
+                                                es obligatorio.</div>
+                                            <div *ngIf="registroForm.get('telefono')?.errors?.['pattern']">Solo se
+                                                permiten números.</div>
+                                        </div>
 
-            <!-- Cantidad -->
-            <div class="input-group mb-4">
-              <span class="input-group-text">
-                <i class="bi bi-cash-stack"></i>
-              </span>
-              <input
-                id="cantidad"
-                type="number"
-                class="form-control"
-                formControlName="cantidad"
-                placeholder="Ej. 15000"
-                [ngClass]="{ 'is-invalid': registroForm.get('cantidad')?.touched && registroForm.get('cantidad')?.invalid }"
-              />
-            </div>
-            <div class="invalid-feedback d-block" *ngIf="registroForm.get('cantidad')?.touched && registroForm.get('cantidad')?.invalid">
-              <div *ngIf="registroForm.get('cantidad')?.errors?.['required']">La cantidad es obligatoria.</div>
-              <div *ngIf="registroForm.get('cantidad')?.errors?.['pattern']">Solo se permiten números enteros.</div>
-              <div *ngIf="registroForm.get('cantidad')?.errors?.['max']">La cantidad no puede ser mayor a 50,000.</div>
-            </div>
+                                        <!-- Cantidad -->
+                                        <div class="mb-1">
+                                            <label for="cantidad" class="form-label fw-semibold">Cantidad*:</label>
+                                        </div>
+                                        <div class="input-group mb-4">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-cash-stack"></i>
+                                            </span>
+                                            <input id="cantidad" type="number" class="form-control"
+                                                formControlName="cantidad" placeholder="Ej. 15000"
+                                                [ngClass]="{ 'is-invalid': registroForm.get('cantidad')?.touched && registroForm.get('cantidad')?.invalid }" />
+                                        </div>
+                                        <div class="invalid-feedback d-block"
+                                            *ngIf="registroForm.get('cantidad')?.touched && registroForm.get('cantidad')?.invalid">
+                                            <div *ngIf="registroForm.get('cantidad')?.errors?.['required']">La cantidad
+                                                es obligatoria.</div>
+                                            <div *ngIf="registroForm.get('cantidad')?.errors?.['pattern']">Solo se
+                                                permiten números enteros.</div>
+                                            <div *ngIf="registroForm.get('cantidad')?.errors?.['max']">La cantidad no
+                                                puede ser mayor a 50,000.</div>
+                                        </div>
 
-            <div class="d-grid">
-              <button [disabled]="registroForm.invalid" class="btn btn-primary btn-lg" type="submit">
-                Enviar
-              </button>
-            </div>
-          </form>
+                                        <div class="d-grid">
+                                            <button [disabled]="registroForm.invalid" class="btn btn-primary btn-lg"
+                                                type="submit">
+                                                Enviar
+                                            </button>
+                                        </div>
+                                    </form>
 
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 }@else{
                 <div class="container">
