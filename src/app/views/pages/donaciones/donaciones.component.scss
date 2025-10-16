@@ -1,6 +1,6 @@
 :host {
   display: block;
-  max-width: 600px;
+  max-width: auto;
   margin: 0 auto;
 }
 
@@ -10,4 +10,104 @@
 
 .form-control.is-invalid {
   border-color: #dc3545;
+}
+
+
+// ++++++++++++++++++++++++++++++++++++++++++++++
+
+.submit-anim-btn {
+  position: relative;
+  width: 150px;
+  height: 50px;
+  background: white;
+  border: 4px solid #96134b;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #96134b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-anim-btn span {
+  position: relative; /* para que esté encima del spinner */
+  z-index: 2;
+}
+
+/* Spinner animado con ::before para que solo el borde gire */
+.submit-anim-btn.animating {
+  width: 50px;
+  padding: 0; /* quitar padding si hay */
+  color: transparent;
+  cursor: default;
+}
+
+.submit-anim-btn.animating::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 4px solid transparent;
+  border-left-color: #96134b;
+  border-bottom-color: #96134b;
+  border-radius: 50px;
+  animation: spin 2s linear forwards;
+  z-index: 1;
+}
+
+/* Paloma: el SVG fijo, arriba y con animación de aparición */
+.submit-anim-btn svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  fill: transparent;
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+  z-index: 3;
+  transition: opacity 0.3s ease;
+}
+
+/* Cuando está animando, la paloma aparece (sin moverse) */
+.submit-anim-btn.animating svg {
+  opacity: 1;
+  animation: check 0.5s forwards;
+  fill: #17b978; /* verde */
+}
+
+.submit-anim-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: scale(0.95);
+  color: #96134b;
+  background: white;
+  border-color: #96134b;
+  box-shadow: none;
+}
+
+/* Animación spinner que solo gira el borde */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(1080deg);
+  }
+}
+
+/* Animación de check: opacidad y relleno verde */
+@keyframes check {
+  0% {
+    fill: transparent;
+    opacity: 0;
+  }
+  100% {
+    fill: #17b978;
+    opacity: 1;
+  }
 }

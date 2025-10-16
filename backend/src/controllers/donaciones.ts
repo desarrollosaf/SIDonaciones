@@ -39,7 +39,6 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
       });
     }
 
- 
 
     const folio: number = Math.floor(10000000 + Math.random() * 90000000);
     const verificador: number = Math.floor(10000000 + Math.random() * 90000000);
