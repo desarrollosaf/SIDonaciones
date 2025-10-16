@@ -19,6 +19,10 @@ export const routes: Routes = [
         loadComponent: () => import('./views/pages/citas/citas.component').then(c => c.CitasComponent)
       },
       {
+        path: 'registro',
+        loadComponent: () => import('./views/pages/registro/registro.component').then(c => c.RegistroComponent)
+      },
+      {
         path: 'donacion',
         loadComponent: () => import('./views/pages/donaciones/donaciones.component').then(c => c.DonacionesComponent)
       },

@@ -13,7 +13,8 @@ import { RouterOutlet } from '@angular/router';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions } from '@fullcalendar/core'; // useful for typechecking
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { CitasService } from '../../../service/citas.service';
+import { RegistroService } from '../../../service/registro.service';
+import { FeplemService } from '../../../service/feplem.service';
 import { UserService } from '../../../core/services/user.service';
 
 
@@ -36,8 +37,7 @@ export class RegistroComponent {
   fechaFormat: any;
   fechaModal: any;
   selectedHour: string = '';
-  fechaSeleccionada: any;
-  horaSeleccionada: string = '';
+
   mensajeDisponibilidad: string = '';
   numeroLugares: number = 0;
   currentUser: any;
@@ -56,17 +56,17 @@ export class RegistroComponent {
     horario_texto: string;
     sedes: { sede_id: number; sede_texto: string }[];
   }[] = [];
-  horaSeleccionada2: number | null = null;
-  sedeSeleccionada: number | null = null;
-  sedesDisponibles2: Array<{ sede_id: number; sede_texto: string }> = [];
+
   correoUsuario: string = '';
   correoConfirmado: string = '';
   telefonoUsuario: string = '';
   telefonoConfirmado: string = '';
+  donativo:  number | null = null;
   enviandoRegistro: number | null = null;
 
 
-  public _citasService = inject(CitasService);
+  public _registroService = inject(RegistroService);
+  public _feplemService = inject(FeplemService)
 
   constructor(private fb: FormBuilder, private modalService: NgbModal, private router: Router, private _userService: UserService) {
     this.formModal = this.fb.group({
@@ -79,7 +79,7 @@ export class RegistroComponent {
 
   ngOnInit(): void {
     this.currentUser = this._userService.currentUserValue;
-    this._citasService.getcitaRFC(this.currentUser.rfc).subscribe({
+    /*this._registroService.getcitaRFC(this.currentUser.rfc).subscribe({
       next: (response: any) => {
         this.datosCita = response
         // console.log(this.datosCita);
@@ -105,104 +105,11 @@ export class RegistroComponent {
           console.error('Error del servidor:', msg);
         }
       }
-    });
+    });*/
   }
 
-  calendarOptions: CalendarOptions = {
-    plugins: [dayGridPlugin, interactionPlugin],
-    initialView: 'dayGridMonth',
-    initialDate: '2025-11-04',
-    locale: 'es',
-    buttonText: {
-      today: 'Hoy',
-      month: 'Mes',
-      week: 'Semana',
-      day: 'Día',
-      list: 'Lista'
-    },
-    selectable: true,
-    editable: false,
-    weekends: true,
-    dayMaxEvents: true,
-    validRange: {
-      start: '2025-11-01',
-      end: '2025-11-30'
-    },
-
-    dateClick: (info) => {
-      const clickedDate = info.dateStr;
-      if (this.highlightedDates.includes(clickedDate)) {
-        this.selectedDate = info.date;
-        this.fechaCitaEnvio = clickedDate;
-        this.fechaFormateadaM = info.date.toLocaleDateString('es-MX', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        });
-        this._citasService.getCitas(clickedDate).subscribe({
-          next: (response: any) => {
-            const sedeFija = this.fechaCitaEnvio === '2025-11-04' ? 1 : (this.fechaCitaEnvio === '2025-11-05' ? 2 : null);
-
-            if (sedeFija) {
-              this.horarios = (response.horarios || []).filter((horario: any) =>
-                horario.sedes.some((sede: any) => sede.sede_id === sedeFija)
-              );
-              this.horarios.forEach(horario => {
-                horario.sedes = horario.sedes.filter(sede => sede.sede_id === sedeFija);
-              });
-
-              this.horaSeleccionada2 = null;
-              this.sedeSeleccionada = sedeFija;
-              this.sedesDisponibles2 = this.horarios.length > 0 ? this.horarios[0].sedes : [];
-            } else {
-              this.horarios = response.horarios || [];
-              this.sedeSeleccionada = null;
-              this.sedesDisponibles2 = [];
-            }
-
-            // console.log(this.horarios);
-          },
-          error: (e: HttpErrorResponse) => {
-            const msg = e.error?.msg || 'Error desconocido';
-            console.error('Error del servidor:', msg);
-          }
-        });
-        this.abrirModal(null);
-      } else {
-        console.log('Fecha no permitida:', clickedDate);
-      }
-    },
-
-    dayCellDidMount: (info) => {
-      const dateStr = info.date.toISOString().split('T')[0];
-      const isEnabled = this.highlightedDates.includes(dateStr);
-
-      if (!isEnabled) {
-        info.el.style.backgroundColor = '#f0f0f0';
-        info.el.style.opacity = '0.4';
-        info.el.style.pointerEvents = 'none';
-      } else {
-        info.el.style.backgroundColor = '#d1e7dd';
-        info.el.style.border = '2px solid #0f5132';
-        info.el.style.cursor = 'pointer';
-      }
-    }
-  };
-
-  onHoraChange() {
-    const horario = this.horarios.find(h => h.horario_id === this.horaSeleccionada2);
-
-    if (this.sedeSeleccionada) {
-      this.sedesDisponibles2 = (horario?.sedes ?? []).filter(sede => sede.sede_id === this.sedeSeleccionada);
-    } else {
-      this.sedesDisponibles2 = (horario?.sedes ?? []).map(sede => {
-        if (typeof sede === 'string') {
-          return { sede_id: 0, sede_texto: sede };
-        }
-        return sede;
-      });
-    }
-  }
+  
+  
 
 
   guardarSeleccion() {
@@ -260,17 +167,15 @@ export class RegistroComponent {
 
 
     const datos = {
-      fecha_cita: this.fechaCitaEnvio,
-      horario_id: this.horaSeleccionada2,
-      sede_id: this.sedeSeleccionada,
       rfc: this.currentUser.rfc,
       correo: this.correoUsuario,
-      telefono: this.telefonoUsuario
+      telefono: this.telefonoUsuario,
+      donativo: this.donativo
     };
 
     this.enviandoRegistro = 1;
 
-    this._citasService.saveCita(datos).subscribe({
+    this._registroService.saveRegistro(datos).subscribe({
       next: (response: any) => {
         this.enviandoRegistro = null;
         if (response.status == 200) {
@@ -282,12 +187,20 @@ export class RegistroComponent {
             showConfirmButton: false,
             timer: 5000
           });
-          this._citasService.getcitaRFC(this.currentUser.rfc).subscribe({
+
+          const firma = {
+            user_rfc: 'PLEM62',
+            path: response.donativo.path,
+            docI: response.donativo.folio,
+            firma_status: '1',
+            status_doc: '1',
+            tipo: '1',
+            firma: '1',
+            contra: 'PLEM62',
+          };
+          this._feplemService.firma(firma).subscribe({
             next: (response: any) => {
-              this.datosCita = response
-              if (response.citas.length > 0) {
-                this.mostrarCalendario = true;
-              }
+             console.log(response)
             },
             error: (e: HttpErrorResponse) => {
               if (e.status == 400) {
@@ -308,8 +221,7 @@ export class RegistroComponent {
               }
             }
           });
-          this.mostrarCalendario = true;
-          this.modalRef.close();
+          
         }
 
       },
@@ -337,84 +249,8 @@ export class RegistroComponent {
   }
 
 
-
-  onEventClick(arg: any): void {
-    // console.log('holi')
-    const evento = arg.event;
-    const today = new Date();
-    const clickedDate = evento.start;
-    this.selectedDate = evento.start;
-    this.fechaSeleccionada = evento.start;
-    const year = clickedDate.getFullYear();
-    const month = String(clickedDate.getMonth() + 1).padStart(2, '0'); // Mes va de 0 a 11
-    const day = String(clickedDate.getDate()).padStart(2, '0');
-
-    this.fechaFormat = `${year}-${month}-${day}`;
-    this.fechaFormateadaM = this.fechaSeleccionada.toLocaleDateString('es-MX', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-
-    this.abrirModal(1)
-  }
-
-  abrirModal(persona: any) {
-    this.personaSeleccionada = persona;
-
-
-    if (this.fechaCitaEnvio === '2025-11-04') {
-      this.sedeSeleccionada = 1;
-    } else if (this.fechaCitaEnvio === '2025-11-05') {
-      this.sedeSeleccionada = 2;
-    } else {
-      this.sedeSeleccionada = null;
-    }
-
-    if (this.sedeSeleccionada) {
-      this.sedesDisponibles2 = [this.getSedeById(this.sedeSeleccionada)];
-    } else {
-      this.sedesDisponibles2 = [];
-    }
-
-    this.horarios = this.horarios.filter(horario =>
-      horario.sedes.some(sede => sede.sede_id === this.sedeSeleccionada)
-    );
-
-    if (this.horarios.length > 0) {
-      this.horaSeleccionada2 = this.horarios[0].horario_id;
-    } else {
-      this.horaSeleccionada2 = null;
-    }
-
-    this.modalRef = this.modalService.open(this.xlModal, { size: 'xl' });
-    setTimeout(() => {
-      const elementoDentroDelModal = document.getElementById('focus-target');
-      elementoDentroDelModal?.focus();
-      if (this.table) {
-        this.table.recalculate();
-      }
-    }, 400);
-
-    this.modalRef.result.then(() => {
-      this.limpiaf();
-      this.viewState = 'lista';
-    }).catch(() => {
-      this.limpiaf();
-      this.viewState = 'lista';
-    });
-  }
-
-  getSedeById(id: number) {
-    const allSedes = [
-      { sede_id: 1, sede_texto: 'Salón Narciso Bassols' },
-      { sede_id: 2, sede_texto: 'Sede 2' },
-    ];
-    return allSedes.find(sede => sede.sede_id === id) || { sede_id: id, sede_texto: 'Sede desconocida' };
-  }
-
-  descargarpdf() {
-    this._citasService.generarPdfinal(this.currentUser.rfc).subscribe({
+  /*descargarpdf() {
+    this._registroService.generarPdfinal(this.currentUser.rfc).subscribe({
       next: (res: Blob) => {
         const blob = new Blob([res], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);
@@ -429,7 +265,7 @@ export class RegistroComponent {
       }
     });
 
-  }
+  }*/
 
   limpiaf() {
     ['textLink', 'descripcion'

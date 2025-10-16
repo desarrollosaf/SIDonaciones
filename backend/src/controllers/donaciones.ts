@@ -78,7 +78,7 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
       process.env.JWT_SECRET || 'sUP3r_s3creT_ClavE-4321!', 
       { expiresIn: '2d' } 
     );
-    const enlace = `https://dev5.siasaf.gob.mx/registro/verifica?token=${token}`;
+    const enlace = `https://donacionescongreso.siasaf.gob.mx/registro/verifica?token=${token}`;
 
     (async () => {
       try {
@@ -91,18 +91,18 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
         const contenido = `
            <div class="container">
             <p  class="pderecha" >${fechaFormateada}</p>
-            <p>C. ${body.rfc} ${body.rfc} ${body.rfc},</p>
-            <p>Tu ayuda brinda apoyo inmediato a las familias afectadas por las intensas lluvias e inundaciones en los estados de Hidalgo, Puebla y Veracruz.  Con tu aportación, contribuimos a ofrecer alimentos, refugio, atención médica y artículos de primera necesidad a quienes más lo necesitan</p>
+            <p><strong>Estimado(a) servidor(a) público(a):</strong> ${body.rfc} ${body.rfc} ${body.rfc},</p>
+            <p>Gracias por tu solidaridad. Has registrado correctamente tu <strong>aportación voluntaria</strong> en apoyo a las familias afectadas por las lluvias en <strong>Hidalgo, Puebla y Veracruz.</strong></p>
+            <p>Para completar el proceso y autorizar el descuento correspondiente, es necesario que <strong>valides tu donativo</strong> haciendo clic en el siguiente enlace:</p>
             <div class="credentials">
-            <strong>Acepto donar la cantidad de </strong> <a href="${enlace}">$XX.00 MXN.</a>
+            <strong></strong> <a href="${enlace}">🔗 Confirmar mi donativo</a>
             </div>
-            <p>Otorgo mi consentimiento expreso y voluntario para que el monto indicado sea retenido de la segunda quincena de octubre del año en curso; y destinado íntegramente al fondo de apoyo a los damnificados por las lluvias en los estados de Hidalgo, Puebla y Veracruz. </p>
-            <a href="https://dev5.siasaf.gob.mx/auth/login" class="button" target="_blank">Iniciar registro</a>
+            <p>Tu registro se encuentra asociado al <strong>RFC ingresado en el portal</strong> y el descuento será aplicado en la <strong>segunda quincena de octubre del presente año</strong>, conforme al monto que autorizaste. Una vez confirmada la validación, el sistema <strong>emitirá automáticamente tu comprobante digital</strong>, el cual servirá como constancia oficial del donativo</p>
             <p class="footer">
               Si tiene problemas para hacer clic en el botón, copie y pegue esta URL en su navegador:<br>
                ${enlace}
             </p>
-            <p>Atentamente,<br><strong>Poder Legislativo del Estado de México</strong>Este comprobante ampara un donativo voluntario, registrado a través del portal donaciones.congresoedomex.gob.mx, el cual será destinado íntegramente al fondo de apoyo para las familias afectadas por las lluvias en Hidalgo, Puebla y Veracruz</p>
+            <p>Este mensaje fue generado automáticamente por el sistema de registro del portal https://donacionescongreso.siasaf.gob.mx/. Por motivos de seguridad, el enlace de validación <strong>tendrá una vigencia de 24 horas</strong> a partir de la recepción de este correo.</p>
           </div>
         `;
         let htmlContent = generarHtmlCorreo(contenido);
@@ -119,19 +119,15 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
     })();
 
 
-    /*const pdfBuffer = await generarPDFBuffer({
-      folio: cita.folio,
+    const pdfBuffer = await generarPDFBuffer({
+      folio: donacionCreate.folio,
       nombreCompleto: nombreCompleto,
-      sexo: sexo,
-      edad: edad,
-      correo: body.correo,
-      curp: body.rfc,
-      fecha: cita.fecha_cita,
-      telefono: body.telefono,
-      sede: sede2,
-      horario: horario,
-      citaId: cita.id
-    });*/
+      correo: donacionCreate.correo,
+      rfc: donacionCreate.rfc,
+      telefono: donacionCreate.telefono,
+      cantidad: donacionCreate.cantidad,
+      donacionID: donacionCreate.id 
+    });
 
     // Enviar el PDF como respuesta al usuario
     /*res.setHeader("Content-Type", "application/pdf");
@@ -140,6 +136,7 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
 
     return res.json({
       status: 200,
+      donativo: donacionCreate,
       msg: "Donativo registrada correctamente",
     });
 
@@ -225,19 +222,29 @@ function generarHtmlCorreo(contenidoHtml: string): string {
   `;
 }
 
+interface PDFData {
+  folio: string;
+  nombreCompleto: string;
+  correo: string;
+  rfc: string;
+  telefono: string;
+  cantidad: number;
+  donacionID: number; 
+}
+
 export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
   return new Promise(async (resolve, reject) => {
     const doc = new PDFDocument({ size: "LETTER", margin: 50 });
     const chunks: any[] = [];
 
-    const pdfDir = path.join(process.cwd(), "storage/public/pdfs");
+    const pdfDir = path.join(process.cwd(), "storage/public/files/pdfs");
     if (!fs.existsSync(pdfDir)) {
       fs.mkdirSync(pdfDir, { recursive: true });
     }
 
     const fileName = `acuse_${data.folio}.pdf`;
     const filePath = path.join(pdfDir, fileName);
-    const relativePath = path.join("storage", "public", "pdfs", fileName);
+    const relativePath = path.join("storage", "public",  "files", "pdfs", fileName);
     console.log(relativePath)
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
@@ -246,10 +253,10 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
     doc.on("end", async () => {
       try {
         // Guardar la ruta del PDF en la tabla citas
-        /*await Cita.update(
+        await Donaciones.update(
           { path: relativePath },
-          { where: { id: data.citaId } }
-        );*/
+          { where: { id: data.donacionID } }
+        );
 
 
         resolve(Buffer.concat(chunks));
@@ -259,65 +266,52 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
     });
     doc.on("error", reject);
 
-    // ===== CONTENIDO DEL PDF =====
-    doc.image(path.join(__dirname, "../assets/salud_page.jpg"), 0, 0, {
+    doc.image(path.join(__dirname, "../assets/membrete_donativo.jpg"), 0, 0, {
       width: doc.page.width,
       height: doc.page.height,
     });
 
-    doc.moveDown(5);
+    doc.moveDown(7);
     doc
-  .fontSize(18)
-  .font("Helvetica-Bold")
-  .fillColor("#7d0037") // ✅ Aplica el color
-  .text("CAMPAÑA GRATUITA DE SALUD MASCULINA", {
-    align: "center",
-  })
-  .fillColor("black");
+      .fontSize(18)
+      .font("Helvetica-Bold")
+      .fillColor("#7d0037") 
+      .text("COMPROBANTE DE DONATIVO", {
+        align: "center",
+      })
+      .fillColor("black");
 
     doc.moveDown(2);
     doc.font("Helvetica").fontSize(12).text(`Folio: ${data.folio}`, { align: "right" });
-    doc.font("Helvetica").fontSize(12).text(`Fecha cita: ${data.fecha}`, { align: "right" });
     doc.fontSize(12)
       .font("Helvetica")
-      .text(`Paciente: ${data.nombreCompleto} | Masculino | ${data.edad}`, { align: "left" })
-      .text(`CURP: ${data.curp}`, { align: "left" })
+      .text(`Emisor: ${data.nombreCompleto} `, { align: "left" })
       .text(`Correo electrónico: ${data.correo} | Teléfono: ${data.telefono}`, { align: "left" })
-      .text(`Ubicación: ${data.sede}`, { align: "left" })
-      .text(`Horario: ${data.horario}`, { align: "left" });
 
     doc.moveDown();
     doc.fontSize(11).text(
-      "El Voluntariado del Poder Legislativo del Estado de México organiza la Campaña gratuita de salud masculina, que incluye Check up médico y la prueba de Antígeno Prostático Específico (PSA).",
+      "Tu ayuda brinda apoyo inmediato a las familias afectadas por las intensas lluvias e inundaciones en los estados de Hidalgo, Puebla y Veracruz.  Con tu aportación, contribuimos a ofrecer alimentos, refugio, atención médica y artículos de primera necesidad a quienes más lo necesitan.",
+      { align: "justify" }
+    );
+
+    doc.moveDown();
+    doc.font('Helvetica-Bold')
+    .fontSize(11)
+    .text(`Acepto donar la cantidad de: $${data.cantidad} MXN.`, {
+      align: "center"
+    });
+    
+    doc.moveDown();
+    doc.font("Helvetica").fontSize(11).text(
+      "Otorgo mi consentimiento expreso y voluntario para que el monto indicado sea retenido de la segunda quincena de octubre del año en curso; y destinado íntegramente al fondo de apoyo a los damnificados por las lluvias en los estados de Hidalgo, Puebla y Veracruz. ",
       { align: "justify" }
     );
 
     doc.moveDown();
     doc.fontSize(11).text(
-      "Para acceder a este beneficio, es indispensable presentar en el día y hora asignados la siguiente documentación:",
+      "Leyenda: Este comprobante ampara un donativo voluntario, registrado a través del portal donaciones.congresoedomex.gob.mx, el cual será destinado íntegramente al fondo de apoyo para las familias afectadas por las lluvias en Hidalgo, Puebla y Veracruz.",
       { align: "justify" }
     );
-    doc.moveDown();
-    doc.fontSize(11).list(
-      [
-        "Identificación oficial: Se aceptará únicamente credencial para votar (INE) vigente o gafete oficial expedido por la Dirección de Administración y Desarrollo de Personal. Deberán presentarse en original y copia.",
-      ],
-      { bulletIndent: 20 }
-    );
-     doc.fontSize(11).text(
-      "Si no se presenta alguno de estos documentos el día de la cita, no podrá realizar su examen y este se dará por perdido. Aviso de Privacidad",
-      { align: "justify" }
-    );
-
-    doc.moveDown();
-    doc.font("Helvetica-Bold").fontSize(10).text("Aviso de Privacidad", { align: "left" });
-    doc.font("Helvetica").fontSize(9).text("Consúltalo en:", { align: "left" });
-    doc.font("Helvetica")
-      .fontSize(9)
-      .text(
-        "https://legislacion.legislativoedomex.gob.mx/storage/documentos/avisosprivacidad/expediente-clinico.pdf",
-        { align: "left" }
-      );
 
     doc.end();
   });

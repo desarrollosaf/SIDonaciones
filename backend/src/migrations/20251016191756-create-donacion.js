@@ -44,6 +44,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      fecha_registro: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
       verified_at: {
         type: Sequelize.DATE,
         allowNull: true,
