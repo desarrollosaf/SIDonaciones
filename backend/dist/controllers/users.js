@@ -95,12 +95,20 @@ const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     return res.json({ user, bandera });
 });
 exports.LoginUser = LoginUser;
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = req.user;
+    const datos_user = yield s_usuario_2.default.findOne({
+        where: { N_Usuario: user.rfc },
+        attributes: [
+            "Nombre",
+        ],
+        raw: true
+    });
     res.json({
         rfc: user.rfc,
+        nombre: datos_user
     });
-};
+});
 exports.getCurrentUser = getCurrentUser;
 const cerrarsesion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.clearCookie('accessToken', {

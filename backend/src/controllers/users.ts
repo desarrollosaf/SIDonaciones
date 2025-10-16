@@ -104,10 +104,19 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     return res.json({ user, bandera })
 }
 
-export const getCurrentUser = (req: Request, res: Response) => {
+export const getCurrentUser = async (req: Request, res: Response) => {
     const user = (req as any).user;
+    const datos_user = await SUsuario.findOne({
+        where: { N_Usuario: user.rfc },
+        attributes: [
+            "Nombre",
+        ],
+        raw: true
+    });
+    
     res.json({
         rfc: user.rfc,
+        nombre:datos_user
     });
 };
 
