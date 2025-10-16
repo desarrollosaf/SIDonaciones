@@ -38,7 +38,7 @@ module.exports = {
       estatus: {
         type: Sequelize.STRING,
         allowNull: false,
-        defaultValue: 'pendiente',
+        defaultValue: '1',
       },
       verificador: {
         type: Sequelize.STRING,

@@ -22,6 +22,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const path_1 = __importDefault(require("path"));
 const auth_1 = require("../middlewares/auth");
 const citas_1 = __importDefault(require("../routes/citas"));
+const donaciones_1 = __importDefault(require("../routes/donaciones"));
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
@@ -41,6 +42,7 @@ class Server {
         this.app.use(combos_1.default);
         this.app.use(user_1.default);
         this.app.use(citas_1.default);
+        this.app.use(donaciones_1.default);
     }
     midlewares() {
         this.app.use(express_1.default.json());
