@@ -27,6 +27,10 @@ export const routes: Routes = [
         loadComponent: () => import('./views/pages/donaciones/donaciones.component').then(c => c.DonacionesComponent)
       },
       {
+        path: 'registro/verifica',
+        loadComponent: () => import('./views/pages/verifica/verifica.component').then(c => c.VerificaComponent)
+      },
+      {
         path: 'reportes',
         canActivateChild: [UserAccessGuard],
         loadChildren: () => import('./views/pages/reportes/reportes.route')
