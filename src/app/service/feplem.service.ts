@@ -23,6 +23,6 @@ export class FeplemService {
       'Access-Control-Allow-Origin': 'https://donacionescongreso.siasaf.gob.mx', // Add CORS headers if necessary
     });
 
-    return this.http.post<string>(`${this.myAppUrl}${this.myAPIUrl}/`, data, { headers });
+    return this.http.post<string>(`${this.myAppUrl}${this.myAPIUrl}`, data, { headers });
   }
 }
