@@ -61,7 +61,7 @@ export class LoginComponent implements OnInit {
         this._userService.setCurrentUser(userData);
         console.log(bandera)
         if (bandera) {
-          this.router.navigate(['/citas']);
+          this.router.navigate(['/donacion']);
         } else {
           // console.log('admin')
           this.router.navigate(['/reportes']);
