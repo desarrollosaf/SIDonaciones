@@ -12,8 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateToken = exports.saveDonacion = exports.getDonacion = void 0;
+exports.validateToken = exports.saveDonacion = exports.getAll = exports.getExcelD = exports.getDonacion = void 0;
 exports.generarPDFBuffer = generarPDFBuffer;
+const sequelize_1 = require("sequelize");
+const s_usuario_1 = __importDefault(require("../models/saf/s_usuario"));
+const t_dependencia_1 = __importDefault(require("../models/saf/t_dependencia"));
+const t_direccion_1 = __importDefault(require("../models/saf/t_direccion"));
+const t_departamento_1 = __importDefault(require("../models/saf/t_departamento"));
 const donaciones_1 = __importDefault(require("../models/donaciones"));
 const dp_fum_datos_generales_1 = require("../models/fun/dp_fum_datos_generales");
 const dp_datospersonales_1 = require("../models/fun/dp_datospersonales");
@@ -25,6 +30,7 @@ const mailer_1 = require("../utils/mailer");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const fs_1 = __importDefault(require("fs"));
+const exceljs_1 = __importDefault(require("exceljs"));
 dp_datospersonales_1.dp_datospersonales.initModel(fun_1.default);
 dp_fum_datos_generales_1.dp_fum_datos_generales.initModel(fun_1.default);
 const getDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -47,6 +53,124 @@ const getDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getDonacion = getDonacion;
+const getExcelD = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const donaciones = yield donaciones_1.default.findAll({ raw: true });
+        const dataCompleta = yield Promise.all(donaciones.map((donacion) => __awaiter(void 0, void 0, void 0, function* () {
+            var _a, _b, _c;
+            const datos = yield dp_fum_datos_generales_1.dp_fum_datos_generales.findOne({
+                where: { f_rfc: donacion.rfc },
+                attributes: [
+                    [
+                        sequelize_1.Sequelize.literal(`CONCAT(f_nombre, ' ', f_primer_apellido, ' ', f_segundo_apellido)`),
+                        'nombre_completo',
+                    ],
+                    'f_curp',
+                ],
+                raw: true,
+            });
+            const usuario = yield s_usuario_1.default.findOne({
+                where: { N_Usuario: donacion.rfc },
+                attributes: ['N_Usuario'],
+                include: [
+                    { model: t_dependencia_1.default, as: 'dependencia', attributes: ['nombre_completo'] },
+                    { model: t_direccion_1.default, as: 'direccion', attributes: ['nombre_completo'] },
+                    { model: t_departamento_1.default, as: 'departamento', attributes: ['nombre_completo'] }
+                ],
+                raw: true,
+                nest: true,
+            });
+            return Object.assign(Object.assign({}, donacion), { nombre_completo: (datos === null || datos === void 0 ? void 0 : datos.nombre_completo) || '', f_curp: (datos === null || datos === void 0 ? void 0 : datos.f_curp) || '', dependencia: ((_a = usuario === null || usuario === void 0 ? void 0 : usuario.dependencia) === null || _a === void 0 ? void 0 : _a.nombre_completo) || '', departamento: ((_b = usuario === null || usuario === void 0 ? void 0 : usuario.departamento) === null || _b === void 0 ? void 0 : _b.nombre_completo) || '', direccion: ((_c = usuario === null || usuario === void 0 ? void 0 : usuario.direccion) === null || _c === void 0 ? void 0 : _c.nombre_completo) || '' });
+        })));
+        const workbook = new exceljs_1.default.Workbook();
+        const sheet = workbook.addWorksheet('Donaciones');
+        sheet.mergeCells('A1:H1');
+        const titleCell = sheet.getCell('A1');
+        titleCell.value = 'DONACIONES';
+        titleCell.font = { size: 16, bold: true };
+        titleCell.alignment = { horizontal: 'center' };
+        const headers = [
+            'Nombre',
+            'RFC',
+            'CURP',
+            'Cantidad',
+            'Estatus',
+            'Dependencia',
+            'Departamento',
+            'Dirección',
+        ];
+        sheet.addRow(headers);
+        const headerRow = sheet.getRow(2);
+        headerRow.font = { bold: true };
+        headerRow.alignment = { horizontal: 'center' };
+        dataCompleta.forEach((item) => {
+            sheet.addRow([
+                item.nombre_completo,
+                item.rfc,
+                item.f_curp,
+                item.cantidad,
+                Number(item.estatus) === 1 ? 'Verificado' : 'No verificado',
+                item.dependencia,
+                item.departamento,
+                item.direccion,
+            ]);
+        });
+        sheet.columns.forEach((column) => {
+            var _a;
+            let maxLength = 0;
+            (_a = column.eachCell) === null || _a === void 0 ? void 0 : _a.call(column, { includeEmpty: true }, (cell) => {
+                const cellValue = cell.value ? cell.value.toString() : '';
+                if (cellValue.length > maxLength) {
+                    maxLength = cellValue.length;
+                }
+            });
+            column.width = maxLength + 5;
+        });
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=Donaciones.xlsx`);
+        yield workbook.xlsx.write(res);
+        res.end();
+    }
+    catch (error) {
+        console.error('Error al exportar Excel:', error);
+        return res.status(500).json({ msg: 'Error generando Excel' });
+    }
+});
+exports.getExcelD = getExcelD;
+const getAll = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const donaciones = yield donaciones_1.default.findAll({ raw: true });
+        if (donaciones) {
+            const donacionesConDatos = yield Promise.all(donaciones.map((donacion) => __awaiter(void 0, void 0, void 0, function* () {
+                const datos = yield dp_fum_datos_generales_1.dp_fum_datos_generales.findOne({
+                    where: { f_rfc: donacion.rfc },
+                    attributes: [
+                        [
+                            sequelize_1.Sequelize.literal(`CONCAT(f_nombre, ' ', f_primer_apellido, ' ', f_segundo_apellido)`),
+                            'nombre_completo',
+                        ],
+                        'f_curp',
+                    ],
+                    raw: true,
+                });
+                return Object.assign(Object.assign({}, donacion), datos);
+            })));
+            return res.json({
+                datos: donacionesConDatos,
+            });
+        }
+        else {
+            return res.json({
+                datos: [],
+            });
+        }
+    }
+    catch (error) {
+        console.error('Error al consultar el registro:', error);
+        return res.status(500).json({ msg: 'Error interno del servidor' });
+    }
+});
+exports.getAll = getAll;
 const saveDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { body } = req;

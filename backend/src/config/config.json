@@ -1,9 +1,9 @@
 {
   "development": {
-     "username": "usr_donaciones",
-     "password": "Xjcr79t48LJLQmxsHIjO",
+     "username": "root",
+     "password": "",
      "database": "adminplem_donaciones",
-     "host": "192.168.36.53",
+     "host": "localhost",
      "dialect": "mysql"
   },
   "production": {

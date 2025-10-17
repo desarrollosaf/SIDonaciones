@@ -14,9 +14,9 @@ export class UserAccessGuard implements CanActivate, CanActivateChild {
   canActivate(): boolean {
     
     const rfc = this.userService.currentUserValue?.rfc ?? '';
-    const role = rfc.startsWith('VC') ? 'VC' : 'usuario';
+    const role = rfc.startsWith('DO25') ? 'DO25' : 'usuario';
 
-    if (role == 'VC') {
+    if (role == 'DO25') {
       return true;
     }
 
