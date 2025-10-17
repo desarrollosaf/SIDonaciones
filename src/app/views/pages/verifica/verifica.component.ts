@@ -4,7 +4,6 @@ import { RegistroService } from '../../../service/registro.service';
 import { UserService } from '../../../core/services/user.service';
 import Swal from 'sweetalert2';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
 @Component({
   selector: 'app-verifica',
   imports: [],
