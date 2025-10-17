@@ -22,6 +22,7 @@ export class DonacionesComponent {
   public _registroService = inject(RegistroService);
   public _feplemService = inject(FeplemService)
   isSubmitting = false;
+  datosDona: any = null;
 
 
   constructor(private fb: FormBuilder, private _userService: UserService) {
@@ -35,16 +36,35 @@ export class DonacionesComponent {
     }, { validators: [this.matchFields('correo', 'confirmarCorreo'), this.matchFields('telefono', 'confirmarTelefono')] });
 
   }
-
-
   ngOnInit(): void {
     this.currentUser = this._userService.currentUserValue;
     this.nombreCompleto = this.currentUser.nombre.Nombre;
+    this.getDonacion();
+  }
 
-
-
-
-
+  getDonacion() {
+    this._registroService.getRegistro(this.currentUser.rfc).subscribe({
+      next: (response: any) => {
+        console.log(response);
+        if (Array.isArray(response)) {
+          if (response.length === 0) {
+            this.mostrarForm = false;
+          } else {
+            this.mostrarForm = true;
+            this.datosDona = response;
+          }
+        } else if (response) {
+          this.mostrarForm = true;
+          this.datosDona = response;
+        } else {
+          this.mostrarForm = false;
+        }
+      },
+      error: (e: HttpErrorResponse) => {
+        const msg = e.error?.msg || 'Error desconocido';
+        console.error('Error del servidor:', msg);
+      }
+    });
   }
 
   matchFields(field1: string, field2: string): ValidatorFn {
@@ -103,7 +123,7 @@ export class DonacionesComponent {
                 showConfirmButton: false,
                 timer: 5000
               });
-             
+
             } else {
               const msg = e.error?.msg || 'Error desconocido';
               console.error('Error del servidor:', msg);
@@ -113,8 +133,9 @@ export class DonacionesComponent {
         setTimeout(() => {
           this.isSubmitting = false;
           this.registroForm.reset();
+          this.getDonacion();
           this.mostrarForm = true;
-        }, 3000);
+        }, 2000);
       },
       error: (e: HttpErrorResponse) => {
         const msg = e.error?.msg || 'Error desconocido';
