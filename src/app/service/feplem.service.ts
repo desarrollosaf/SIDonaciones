@@ -20,7 +20,6 @@ export class FeplemService {
   firma(data: any): Observable<string> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json', // Ensure the correct content type
-      'Access-Control-Allow-Origin': 'https://donacionescongreso.siasaf.gob.mx', // Add CORS headers if necessary
     });
 
     return this.http.post<string>(`${this.myAppUrl}${this.myAPIUrl}`, data, { headers });
