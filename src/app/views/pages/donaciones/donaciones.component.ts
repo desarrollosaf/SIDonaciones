@@ -23,7 +23,7 @@ export class DonacionesComponent {
   public _feplemService = inject(FeplemService)
   isSubmitting = false;
   datosDona: any = null;
-
+  isLoading = true;
 
   constructor(private fb: FormBuilder, private _userService: UserService) {
 
@@ -45,7 +45,6 @@ export class DonacionesComponent {
   getDonacion() {
     this._registroService.getRegistro(this.currentUser.rfc).subscribe({
       next: (response: any) => {
-        console.log(response);
         if (Array.isArray(response)) {
           if (response.length === 0) {
             this.mostrarForm = false;
@@ -59,10 +58,12 @@ export class DonacionesComponent {
         } else {
           this.mostrarForm = false;
         }
+        this.isLoading = false;
       },
       error: (e: HttpErrorResponse) => {
         const msg = e.error?.msg || 'Error desconocido';
         console.error('Error del servidor:', msg);
+        this.isLoading = false;
       }
     });
   }
@@ -97,8 +98,6 @@ export class DonacionesComponent {
 
     this._registroService.saveRegistro(datos).subscribe({
       next: (response: any) => {
-        console.log(response);
-        console.log('Formulario enviado:');
         const firma = {
           user_rfc: 'PLEM62',
           path: response.donativo.path,
@@ -111,7 +110,6 @@ export class DonacionesComponent {
         };
         this._feplemService.firma(firma).subscribe({
           next: (response: any) => {
-            console.log(response)
           },
           error: (e: HttpErrorResponse) => {
             if (e.status == 400) {
