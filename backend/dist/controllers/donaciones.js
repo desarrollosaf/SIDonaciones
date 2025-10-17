@@ -135,9 +135,10 @@ const saveDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         /*res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename="Cita-${body.fecha_cita}.pdf"`);
         res.send(pdfBuffer);*/
+        const donacionCre = yield donaciones_1.default.findOne({ where: { id: donacionCreate.id } });
         return res.json({
             status: 200,
-            donativo: donacionCreate,
+            donativo: donacionCre,
             msg: "Donativo registrada correctamente",
         });
     }

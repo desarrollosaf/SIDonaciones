@@ -154,9 +154,13 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
     res.setHeader("Content-Disposition", `attachment; filename="Cita-${body.fecha_cita}.pdf"`);
     res.send(pdfBuffer);*/
 
+    const donacionCre = await Donaciones.findOne(
+      { where: { id: donacionCreate.id } }
+    );
+
     return res.json({
       status: 200,
-      donativo: donacionCreate,
+      donativo: donacionCre,
       msg: "Donativo registrada correctamente",
     });
 
