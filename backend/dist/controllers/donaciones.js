@@ -25,7 +25,6 @@ const mailer_1 = require("../utils/mailer");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const fs_1 = __importDefault(require("fs"));
-const qrcode_1 = __importDefault(require("qrcode"));
 dp_datospersonales_1.dp_datospersonales.initModel(fun_1.default);
 dp_fum_datos_generales_1.dp_fum_datos_generales.initModel(fun_1.default);
 const getDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -309,30 +308,49 @@ function generarPDFBuffer(data) {
             doc.font("Helvetica").fontSize(11).text("Otorgo mi consentimiento expreso y voluntario para que el monto indicado sea retenido de la segunda quincena de octubre del año en curso; y destinado íntegramente al fondo de apoyo a los damnificados por las lluvias en los estados de Hidalgo, Puebla y Veracruz. ", { align: "justify" });
             doc.moveDown();
             doc.fontSize(11).text("Leyenda: Este comprobante ampara un donativo voluntario, registrado a través del portal donaciones.congresoedomex.gob.mx, el cual será destinado íntegramente al fondo de apoyo para las familias afectadas por las lluvias en Hidalgo, Puebla y Veracruz.", { align: "justify" });
+            doc.moveDown(1);
+            doc.font('Helvetica-Bold')
+                .fontSize(11)
+                .text(`Cadena original: `, {
+                align: "center"
+            });
+            doc.moveDown();
+            doc.font("Helvetica").fontSize(11).text(`${cadena}`, { align: "center" });
             doc.moveDown(2);
-            const qrData = `https://donacionescongreso.siasaf.gob.mx/valida?folio=${data.folio}`;
-            qrcode_1.default.toDataURL(qrData, { errorCorrectionLevel: 'H' }, (err, url) => {
-                if (err)
-                    throw err;
-                const base64Data = url.replace(/^data:image\/png;base64,/, '');
-                const qrBuffer = Buffer.from(base64Data, 'base64');
-                const qrSize = 100;
-                const marginTop = doc.y;
-                const qrX = 50;
-                const textX = qrX + qrSize + 20;
-                doc.image(qrBuffer, qrX, marginTop, { width: qrSize, height: qrSize });
-                doc.fontSize(10)
-                    .text(`${cadena}`, textX, marginTop + 30, {
+            /*const qrData = `https://donacionescongreso.siasaf.gob.mx/valida?folio=${data.folio}`;
+        
+            QRCode.toDataURL(qrData, { errorCorrectionLevel: 'H' }, (err, url) => {
+              if (err) throw err;
+        
+              const base64Data = url.replace(/^data:image\/png;base64,/, '');
+              const qrBuffer = Buffer.from(base64Data, 'base64');
+        
+              const qrSize = 100;
+              const marginTop = doc.y;
+              const qrX = 50;
+              const textX = qrX + qrSize + 20;
+        
+              const cadenaX = qrX + qrSize + 20;
+              const cadenaY = marginTop + 60; // un poco más abajo del texto anterior
+        
+              
+        
+              doc.image(qrBuffer, qrX, marginTop, { width: qrSize, height: qrSize });
+            
+              doc.font("Helvetica").fontSize(10)
+                .text(`${cadena}`, textX, marginTop + 30, {
                     width: doc.page.width - textX - 50,
                     align: 'left'
                 });
-                doc.moveDown(6);
-                doc.end();
-            });
+        
+              doc.moveDown(6);
+              doc.end();
+            });*/
+            doc.end();
         }));
     });
 }
-function generarCadenaAleatoria(longitud = 16) {
+function generarCadenaAleatoria(longitud = 64) {
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let resultado = '';
     for (let i = 0; i < longitud; i++) {

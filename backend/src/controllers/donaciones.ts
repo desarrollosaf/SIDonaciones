@@ -366,9 +366,21 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
       { align: "justify" }
     );
 
+    doc.moveDown(1);
+    doc.font('Helvetica-Bold')
+    .fontSize(11)
+    .text(`Cadena original: `, {
+      align: "center"
+    });
+    
+    doc.moveDown();
+    doc.font("Helvetica").fontSize(11).text(
+      `${cadena}`,
+      { align: "center" }
+    );
     doc.moveDown(2); 
 
-    const qrData = `https://donacionescongreso.siasaf.gob.mx/valida?folio=${data.folio}`; 
+    /*const qrData = `https://donacionescongreso.siasaf.gob.mx/valida?folio=${data.folio}`; 
 
     QRCode.toDataURL(qrData, { errorCorrectionLevel: 'H' }, (err, url) => {
       if (err) throw err;
@@ -381,8 +393,14 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
       const qrX = 50; 
       const textX = qrX + qrSize + 20; 
 
+      const cadenaX = qrX + qrSize + 20;
+      const cadenaY = marginTop + 60; // un poco más abajo del texto anterior
+
+      
+
       doc.image(qrBuffer, qrX, marginTop, { width: qrSize, height: qrSize });
-      doc.fontSize(10)
+    
+      doc.font("Helvetica").fontSize(10)
         .text(`${cadena}`, textX, marginTop + 30, {
             width: doc.page.width - textX - 50, 
             align: 'left'
@@ -390,12 +408,13 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
 
       doc.moveDown(6); 
       doc.end();
-    });
+    });*/
 
+    doc.end();
   });
 }
 
-function generarCadenaAleatoria(longitud: number = 16): string {
+function generarCadenaAleatoria(longitud: number = 64): string {
   const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let resultado = '';
   for (let i = 0; i < longitud; i++) {

@@ -132,7 +132,7 @@ export class DonacionesComponent {
           firma: '1',
           contra: 'PLEM62',
         };
-        this._feplemService.firma(firma).subscribe({
+        /*this._feplemService.firma(firma).subscribe({
           next: (response: any) => {
           },
           error: (e: HttpErrorResponse) => {
@@ -151,7 +151,7 @@ export class DonacionesComponent {
               console.error('Error del servidor:', msg);
             }
           }
-        });
+        });*/
         const correo = this.registroForm.value.correo;
 
         Swal.fire({
