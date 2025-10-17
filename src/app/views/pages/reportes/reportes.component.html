@@ -1,17 +1,22 @@
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a routerLink=".">Citas</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Próximas citas</li>
-    </ol>
-</nav>
 <div class="row">
     <div class="col-md-12 stretch-card">
         <div class="card">
             <div class="card-body">
                 <h6 class="card-title">Donaciones</h6>
-                <div class="p-2 text-white text-muted bg-light">
-                    <strong>Hoy: {{fechaHoraActual}}</strong>
+                <div class="row bg-light rounded py-3 px-2 align-items-center shadow-sm mb-3">
+                    <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                        <p class="mb-1 text-muted fw-semibold">Hoy</p>
+                        <h5 class="mb-0 text-primary">{{ fechaHoraActual }}</h5>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <p class="mb-1 text-muted fw-semibold">Total Donado</p>
+                        <h5 class="mb-0 text-success">
+                            ${{ tDon }} <br />
+                            <small class="text-muted">{{ tLetra }}</small>
+                        </h5>
+                    </div>
                 </div>
+                <br>
                 <br>
                 <div class="row">
                     <div class="col-xl-3 col-md-4">
@@ -52,7 +57,8 @@
                                 {{row.rfc}}
                             </ng-template>
                         </ngx-datatable-column>
-                        <ngx-datatable-column [headerClass]="'text-center'" [cellClass]="'text-center'" prop="curp" name="Curp">
+                        <ngx-datatable-column [headerClass]="'text-center'" [cellClass]="'text-center'" prop="curp"
+                            name="Curp">
                             <ng-template let-row="row" ngx-datatable-cell-template>
                                 {{row.f_curp}}
                             </ng-template>

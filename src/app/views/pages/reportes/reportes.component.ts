@@ -46,7 +46,8 @@ export class ReportesComponent {
   loading: boolean = true;
   @ViewChild('table') table: DatatableComponent;
   isLoading: boolean = false;
-
+  tDon = 0;
+  tLetra: any;
   constructor(private fb: FormBuilder, private modalService: NgbModal, private router: Router) { }
 
   ngOnInit(): void {
@@ -57,9 +58,24 @@ export class ReportesComponent {
     }, 1000);
   }
 
+
+
+
+
+
+
+
   getDatos() {
     this._registroService.getAll().subscribe({
       next: (response: any) => {
+        response.datos.forEach((cant: any) => {
+          this.tDon = this.tDon + Number(cant.cantidad);
+        });
+
+        const total = this.tDon;
+        const pesos = Math.floor(total); // 1350
+        const centavos = Math.round((total - pesos) * 100); // 75
+        this.tLetra = `${this.numeroALetras(pesos)} PESOS ${centavos.toString().padStart(2, '0')}/100 M.N.`;
         this.originalData = [...response.datos];
         this.temp = [...this.originalData];
         this.rows = this.temp;
@@ -72,6 +88,53 @@ export class ReportesComponent {
         console.error('Error del servidor:', msg);
       }
     });
+  }
+
+
+
+  numeroALetras(num: number): string {
+    const unidades = ['CERO', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+    const decenas = ['DIEZ', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+    const especiales: { [key: number]: string } = {
+      11: 'ONCE', 12: 'DOCE', 13: 'TRECE', 14: 'CATORCE', 15: 'QUINCE',
+      10: 'DIEZ', 20: 'VEINTE'
+    };
+
+    const convertir = (n: number): string => {
+      if (n < 10) return unidades[n];
+      if (n <= 15) return especiales[n];
+      if (n < 20) return 'DIECI' + unidades[n - 10].toLowerCase();
+      if (n < 30) return 'VEINTI' + unidades[n - 20].toLowerCase();
+      if (n < 100) {
+        const dec = Math.floor(n / 10);
+        const uni = n % 10;
+        return decenas[dec - 1] + (uni ? ' Y ' + unidades[uni] : '');
+      }
+      if (n < 1000) {
+        if (n === 100) return 'CIEN';
+        const centenas = ['CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+        const cent = Math.floor(n / 100);
+        const resto = n % 100;
+        return centenas[cent - 1] + (resto ? ' ' + convertir(resto) : '');
+      }
+      if (n < 1000000) {
+        const mil = Math.floor(n / 1000);
+        const resto = n % 1000;
+        let str = mil === 1 ? 'MIL' : convertir(mil) + ' MIL';
+        if (resto) str += ' ' + convertir(resto);
+        return str;
+      }
+      if (n < 1000000000000) {
+        const millones = Math.floor(n / 1000000);
+        const resto = n % 1000000;
+        let str = millones === 1 ? 'UN MILLÓN' : convertir(millones) + ' MILLONES';
+        if (resto) str += ' ' + convertir(resto);
+        return str;
+      }
+      return 'Número demasiado grande';
+    };
+
+    return convertir(num);
   }
 
   setPage(pageInfo: any) {
