@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Injectable, signal, inject, computed } from '@angular/core';
 import { enviroment } from '../../enviroments/enviroment'; 
@@ -17,7 +17,12 @@ export class FeplemService {
     this.myAPIUrl ='api/firmaDocumentoDonacion';
   }
 
-  firma(data:any): Observable<string> {
-    return this.http.post<string>(`${this.myAppUrl}${this.myAPIUrl}/`,data)
+  firma(data: any): Observable<string> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json', // Ensure the correct content type
+      'Access-Control-Allow-Origin': 'https://donacionescongreso.siasaf.gob.mx', // Add CORS headers if necessary
+    });
+
+    return this.http.post<string>(`${this.myAppUrl}${this.myAPIUrl}/`, data, { headers });
   }
 }
