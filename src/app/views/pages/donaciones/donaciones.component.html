@@ -18,6 +18,33 @@
                 <div class="card-header bg-primary text-white text-center">
                   <h5 class="mb-0">Ingresa tus datos</h5>
                 </div>
+                <div class="alert alert-dark" role="alert" style="text-align: justify;">
+                  Para realizar tu donativo, ingresa en la caja de texto <b>la cantidad que deseas aportar</b>,
+                  asegurándote de que el monto sea <b>numérico y mayor o igual a $1.00 pesos.</b>
+                  <br>
+                  <br>
+                  Evita el uso de comas ni símbolos adicionales. El importe que registres será <b>descontado
+                    automáticamente de tu percepción quincenal de la segunda quincena de octubre del presente año. </b>
+                  <br>
+                  <br>
+                  <b>Envía el formulario</b> para continuar con el proceso. Enseguida recibirás <b> un correo
+                    electrónico con un token de validación</b>, el cual deberás abrir desde la cuenta registrada y <b>
+                    dar clic en el enlace incluido</b> para confirmar la aportación registrada. Esta validación es
+                  indispensable para autorizar el descuento del monto correspondiente en tu <b>percepción quincenal.
+                  </b>
+
+
+                  <br>
+                  <br>
+                  Al enviar el formulario, otorgas <b>tu consentimiento expreso y voluntario</b> para que el monto
+                  indicado sea retenido y destinado íntegramente al <b>fondo de apoyo a los damnificados por las lluvias
+                    en los estados de Hidalgo, Puebla y Veracruz. </b>
+
+                  <br>
+                  <br>
+                  Una vez confirmada la validación, el <b>sistema emitirá automáticamente tu comprobante digital de
+                    donativo</b>, que servirá como acuse y autorización del descuento.
+                </div>
                 <div class="card-body">
                   <form [formGroup]="registroForm" (ngSubmit)="enviardatos()">
                     <div class="row mb-3">
@@ -46,7 +73,7 @@
                             Solo se permiten números enteros.
                           </div>
                           <div *ngIf="registroForm.get('cantidad')?.errors?.['max']">
-                            La cantidad no puede ser mayor a 50,000.
+                            La cantidad no puede ser mayor a 500,000.
                           </div>
                         </div>
                       </div>
@@ -130,9 +157,17 @@
                         </div>
                       </div>
                     </div>
-
+                    <div class="form-check mt-4">
+                      <input type="checkbox" class="form-check-input" id="avisoPrivacidadCheck"
+                        [checked]="aceptaPrivacidad" (click)="!aceptaPrivacidad && abrirModal()"
+                        [disabled]="aceptaPrivacidad" />
+                      <label class="form-check-label" for="avisoPrivacidadCheck">
+                        Leer concentimiento
+                      </label>
+                    </div>
                     <div class="d-flex justify-content-center mt-4">
-                      <button type="submit" class="submit-anim-btn" [disabled]="registroForm.invalid || isSubmitting"
+                      <button type="submit" class="submit-anim-btn"
+                        [disabled]="registroForm.invalid || isSubmitting || !aceptaPrivacidad"
                         [ngClass]="{ animating: isSubmitting }">
                         <span *ngIf="!isSubmitting">Enviar</span>
 
@@ -159,21 +194,17 @@
                 <table class="table table-striped table-bordered">
                   <thead>
                     <tr>
+                      <th class="text-center">PDF</th>
                       <th class="text-center">Folio</th>
                       <th class="text-center">Nombre</th>
                       <th class="text-center">Correo</th>
                       <th class="text-center">Teléfono</th>
                       <th class="text-center">Cantidad</th>
-                      <th class="text-center">PDF</th>
+
                     </tr>
                   </thead>
                   <tbody>
                     <tr class="table-active">
-                      <td class="text-center">{{ datosDona.folio }}</td>
-                      <td class="text-center">{{ nombreCompleto }}</td>
-                      <td class="text-center">{{ datosDona.correo }}</td>
-                      <td class="text-center">{{ datosDona.telefono }}</td>
-                      <td class="text-center">$ {{ datosDona.cantidad }}</td>
                       <td class="text-center">
                         <ng-container *ngIf="datosDona.estatus == 1; else noDisponible">
                           <a [href]="" target="_blank" title="Ver PDF">
@@ -184,6 +215,12 @@
                           <span class="text-muted">No disponible</span>
                         </ng-template>
                       </td>
+                      <td class="text-center">{{ datosDona.folio }}</td>
+                      <td class="text-center">{{ nombreCompleto }}</td>
+                      <td class="text-center">{{ datosDona.correo }}</td>
+                      <td class="text-center">{{ datosDona.telefono }}</td>
+                      <td class="text-center">$ {{ datosDona.cantidad }}</td>
+
                     </tr>
                   </tbody>
                 </table>
@@ -197,3 +234,27 @@
     </div>
   </div>
 </div>
+
+<ng-template #xlModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title" style="color: #96134b;">CONSENTIMIENTO</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('cerrado')"></button>
+  </div>
+  <div class="modal-body">
+    <p style="text-align: justify;">Por medio del presente documento, manifiesto de manera libre y voluntaria mi
+      consentimiento para el apoyo solidario a los damificados por las lluvias organizado por Congreso del Estado de
+      México.
+      <br>
+      <br>
+      Declaro que este apoyo se realiza sin fines de lucro ni coerción alguna, y con la convicción de contribuir al
+      bienestar de quienes más lo necesitan.
+      <br>
+      <br>
+      Asimismo, autorizo que mi donativo sea administrado y entregado conforme a los mecanismos que determine la
+      institución, garantizando su uso con fines humanitarios y de manera transparente.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="aceptarPrivacidad()">Aceptar</button>
+  </div>
+</ng-template>

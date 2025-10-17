@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidatorFn } from '@angular/forms'
 import { UserService } from '../../../core/services/user.service';
@@ -7,7 +7,7 @@ import { RegistroService } from '../../../service/registro.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FeplemService } from '../../../service/feplem.service';
 import Swal from 'sweetalert2';
-
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-donaciones',
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
@@ -24,15 +24,18 @@ export class DonacionesComponent {
   isSubmitting = false;
   datosDona: any = null;
   isLoading = true;
+  @ViewChild('xlModal', { static: true }) xlModal!: TemplateRef<any>;
 
-  constructor(private fb: FormBuilder, private _userService: UserService) {
+  modalRef: NgbModalRef;
+  aceptaPrivacidad: boolean = false;
+  constructor(private fb: FormBuilder, private _userService: UserService, private modalService: NgbModal) {
 
     this.registroForm = this.fb.group({
       correo: ['', [Validators.required, Validators.email]],
       confirmarCorreo: ['', [Validators.required]],
       telefono: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
       confirmarTelefono: ['', [Validators.required]],
-      cantidad: ['', [Validators.required, Validators.pattern('^[0-9]+$'), Validators.max(50000)]],
+      cantidad: ['', [Validators.required, Validators.pattern('^[0-9]+$'), Validators.max(500000)]],
     }, { validators: [this.matchFields('correo', 'confirmarCorreo'), this.matchFields('telefono', 'confirmarTelefono')] });
 
   }
@@ -41,6 +44,23 @@ export class DonacionesComponent {
     this.nombreCompleto = this.currentUser.nombre.Nombre;
     this.getDonacion();
   }
+
+  abrirModal() {
+    this.modalRef = this.modalService.open(this.xlModal, { size: 'lg' });
+    this.modalRef.result
+      .then((result) => {
+        // Aquí puedes manejar el cierre si es necesario
+      })
+      .catch((res) => {
+        // Aquí puedes manejar el cierre con ESC o fuera del modal
+      });
+  }
+
+  aceptarPrivacidad() {
+    this.aceptaPrivacidad = true;
+    this.modalRef.close();
+  }
+
 
   getDonacion() {
     this._registroService.getRegistro(this.currentUser.rfc).subscribe({
@@ -88,6 +108,11 @@ export class DonacionesComponent {
 
 
   enviardatos() {
+
+
+
+
+
     const datos = {
       correo: this.registroForm.value.correo,
       rfc: this.currentUser.rfc,
@@ -95,7 +120,6 @@ export class DonacionesComponent {
       donativo: this.registroForm.value.cantidad
     };
     this.isSubmitting = true;
-
     this._registroService.saveRegistro(datos).subscribe({
       next: (response: any) => {
         const firma = {
@@ -127,6 +151,15 @@ export class DonacionesComponent {
               console.error('Error del servidor:', msg);
             }
           }
+        });
+        const correo = this.registroForm.value.correo;
+
+        Swal.fire({
+          icon: 'info',
+          title: 'Registro enviado',
+          html: `Hemos enviado un token de seguridad a tu correo electrónico: <strong>${correo}</strong> para confirmar la donación.<br><br>Revisa tu bandeja de entrada y sigue las instrucciones.`,
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#96134b',
         });
         setTimeout(() => {
           this.isSubmitting = false;

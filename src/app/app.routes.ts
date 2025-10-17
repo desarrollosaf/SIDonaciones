@@ -14,10 +14,10 @@ export const routes: Routes = [
     children: [
       { path: '',  component: RedirectComponent,
       },
-      {
-        path: 'citas',
-        loadComponent: () => import('./views/pages/citas/citas.component').then(c => c.CitasComponent)
-      },
+      // {
+      //   path: 'citas',
+      //   loadComponent: () => import('./views/pages/citas/citas.component').then(c => c.CitasComponent)
+      // },
       {
         path: 'registro',
         loadComponent: () => import('./views/pages/registro/registro.component').then(c => c.RegistroComponent)
