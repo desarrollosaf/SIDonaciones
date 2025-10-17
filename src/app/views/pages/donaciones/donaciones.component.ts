@@ -5,6 +5,8 @@ import { UserService } from '../../../core/services/user.service';
 import { RouterModule } from '@angular/router';
 import { RegistroService } from '../../../service/registro.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FeplemService } from '../../../service/feplem.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-donaciones',
@@ -18,6 +20,7 @@ export class DonacionesComponent {
   nombreCompleto: any;
   currentUser: any;
   public _registroService = inject(RegistroService);
+  public _feplemService = inject(FeplemService)
   isSubmitting = false;
 
 
@@ -76,6 +79,37 @@ export class DonacionesComponent {
       next: (response: any) => {
         console.log(response);
         console.log('Formulario enviado:');
+        const firma = {
+          user_rfc: 'PLEM62',
+          path: response.donativo.path,
+          docI: response.donativo.folio,
+          firma_status: '1',
+          status_doc: '1',
+          tipo: '1',
+          firma: '1',
+          contra: 'PLEM62',
+        };
+        this._feplemService.firma(firma).subscribe({
+          next: (response: any) => {
+            console.log(response)
+          },
+          error: (e: HttpErrorResponse) => {
+            if (e.status == 400) {
+              Swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: "¡Atención!",
+                text: "Ya tienes una cita activa",
+                showConfirmButton: false,
+                timer: 5000
+              });
+             
+            } else {
+              const msg = e.error?.msg || 'Error desconocido';
+              console.error('Error del servidor:', msg);
+            }
+          }
+        });
         setTimeout(() => {
           this.isSubmitting = false;
           this.registroForm.reset();
