@@ -24,7 +24,7 @@ export class VerificaComponent implements OnInit {
     const token = this.route.snapshot.queryParamMap.get('token');
     this.currentUser = this._userService.currentUserValue;
     console.log(this.currentUser.rfc)
-    this._registroService.validate(this.currentUser.rfc).subscribe({
+    /*this._registroService.validate(this.currentUser.rfc).subscribe({
       next: (response: any) => {
  
         if(response.status == 200){
@@ -82,7 +82,7 @@ export class VerificaComponent implements OnInit {
           console.error('Error del servidor:', msg);
         }
       }
-    });
+    });*/
 
   }
 }
