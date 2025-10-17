@@ -6,6 +6,11 @@ import { RedirectComponent } from './views/pages/auth/redirect.component';
 export const routes: Routes = [
   { path: 'auth', loadChildren: () => import('./views/pages/auth/auth.routes')},
   {
+    path: 'registro/verifica',
+    loadComponent: () => import('./views/pages/verifica/verifica.component').then(c => c.VerificaComponent)
+  },
+  
+  {
     path: '',
     component: BaseComponent,
     canActivateChild: [authGuard],
@@ -43,9 +48,6 @@ export const routes: Routes = [
     path: 'error/:type',
     loadComponent: () => import('./views/pages/error/error.component').then(c => c.ErrorComponent)
   },
-  {
-    path: 'registro/verifica',
-    loadComponent: () => import('./views/pages/verifica/verifica.component').then(c => c.VerificaComponent)
-  },
+ 
   { path: '**', redirectTo: 'error/404', pathMatch: 'full' }
 ];

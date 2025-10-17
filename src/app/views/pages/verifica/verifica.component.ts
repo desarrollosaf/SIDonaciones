@@ -22,8 +22,9 @@ export class VerificaComponent implements OnInit {
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
-    this.currentUser = this._userService.currentUserValue;
-    console.log(this.currentUser.rfc)
+    console.log(token)
+    //this.currentUser = this._userService.currentUserValue;
+    
     /*this._registroService.validate(this.currentUser.rfc).subscribe({
       next: (response: any) => {
  
