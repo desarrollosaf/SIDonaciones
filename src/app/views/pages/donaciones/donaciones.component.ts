@@ -132,6 +132,23 @@ export class DonacionesComponent {
           firma: '1',
           contra: 'PLEM62',
         };
+        console.log(firma)
+        const correo = this.registroForm.value.correo;
+
+        Swal.fire({
+          icon: 'info',
+          title: 'Registro enviado',
+          html: `Hemos enviado un token de seguridad a tu correo electrónico: <strong>${correo}</strong> para confirmar la donación.<br><br>Revisa tu bandeja de entrada y sigue las instrucciones.`,
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#96134b',
+        });
+        setTimeout(() => {
+          this.isSubmitting = false;
+          this.registroForm.reset();
+          this.getDonacion();
+          this.mostrarForm = true;
+        }, 2000);
+
         this._feplemService.firma(firma).subscribe({
           next: (response: any) => {
           },
@@ -152,21 +169,6 @@ export class DonacionesComponent {
             }
           }
         });
-        const correo = this.registroForm.value.correo;
-
-        Swal.fire({
-          icon: 'info',
-          title: 'Registro enviado',
-          html: `Hemos enviado un token de seguridad a tu correo electrónico: <strong>${correo}</strong> para confirmar la donación.<br><br>Revisa tu bandeja de entrada y sigue las instrucciones.`,
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#96134b',
-        });
-        setTimeout(() => {
-          this.isSubmitting = false;
-          this.registroForm.reset();
-          this.getDonacion();
-          this.mostrarForm = true;
-        }, 2000);
       },
       error: (e: HttpErrorResponse) => {
         const msg = e.error?.msg || 'Error desconocido';
