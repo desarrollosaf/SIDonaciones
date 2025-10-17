@@ -25,6 +25,7 @@ const mailer_1 = require("../utils/mailer");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const fs_1 = __importDefault(require("fs"));
+const qrcode_1 = __importDefault(require("qrcode"));
 dp_datospersonales_1.dp_datospersonales.initModel(fun_1.default);
 dp_fum_datos_generales_1.dp_fum_datos_generales.initModel(fun_1.default);
 const getDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -307,6 +308,20 @@ function generarPDFBuffer(data) {
             doc.font("Helvetica").fontSize(11).text("Otorgo mi consentimiento expreso y voluntario para que el monto indicado sea retenido de la segunda quincena de octubre del año en curso; y destinado íntegramente al fondo de apoyo a los damnificados por las lluvias en los estados de Hidalgo, Puebla y Veracruz. ", { align: "justify" });
             doc.moveDown();
             doc.fontSize(11).text("Leyenda: Este comprobante ampara un donativo voluntario, registrado a través del portal donaciones.congresoedomex.gob.mx, el cual será destinado íntegramente al fondo de apoyo para las familias afectadas por las lluvias en Hidalgo, Puebla y Veracruz.", { align: "justify" });
+            doc.moveDown(2);
+            const qrData = 'https://donaciones.congresoedomex.gob.mx/valida?folio=123456';
+            qrcode_1.default.toDataURL(qrData, { errorCorrectionLevel: 'H' }, (err, url) => {
+                if (err)
+                    throw err;
+                const base64Data = url.replace(/^data:image\/png;base64,/, '');
+                const qrBuffer = Buffer.from(base64Data, 'base64');
+                const qrX = (doc.page.width - 100) / 2;
+                doc.image(qrBuffer, qrX, doc.y, { width: 100, height: 100 });
+                doc.moveDown(1);
+                doc.fontSize(10).text('Escanea este código para validar tu comprobante', {
+                    align: 'center'
+                });
+            });
             doc.end();
         }));
     });

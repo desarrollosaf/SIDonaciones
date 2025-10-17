@@ -17,6 +17,7 @@ import { sendEmail } from '../utils/mailer';
 import jwt from 'jsonwebtoken';
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
+import QRCode from 'qrcode';
 
 dp_datospersonales.initModel(sequelizefun);
 dp_fum_datos_generales.initModel(sequelizefun);
@@ -364,6 +365,25 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
       "Leyenda: Este comprobante ampara un donativo voluntario, registrado a través del portal donaciones.congresoedomex.gob.mx, el cual será destinado íntegramente al fondo de apoyo para las familias afectadas por las lluvias en Hidalgo, Puebla y Veracruz.",
       { align: "justify" }
     );
+
+    doc.moveDown(2); 
+
+    const qrData = 'https://donaciones.congresoedomex.gob.mx/valida?folio=123456'; 
+
+    QRCode.toDataURL(qrData, { errorCorrectionLevel: 'H' }, (err, url) => {
+      if (err) throw err;
+      
+      const base64Data = url.replace(/^data:image\/png;base64,/, '');
+      const qrBuffer = Buffer.from(base64Data, 'base64');
+      const qrX = (doc.page.width - 100) / 2;
+      doc.image(qrBuffer, qrX, doc.y, { width: 100, height: 100 });
+
+      doc.moveDown(1);
+      doc.fontSize(10).text('Escanea este código para validar tu comprobante', {
+        align: 'center'
+      });
+
+    });
 
     doc.end();
   });
