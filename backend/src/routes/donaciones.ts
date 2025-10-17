@@ -6,7 +6,7 @@ const router = Router();
 
 router.post("/api/donacion/savedonacion/", saveDonacion)
 router.get("/api/donacion/getdonacion/:rfc", getDonacion) 
-router.get("/api/donacion/validate/:rfc", validateToken)
+router.post("/api/donacion/validate/", validateToken)
 
 
 export default router

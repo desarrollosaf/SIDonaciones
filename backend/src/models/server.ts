@@ -54,19 +54,17 @@ class Server {
 
         this.app.use((req: Request, res: Response, next: NextFunction) => {
             const publicPaths = [
-                /^\/api\/user\/login$/,
-                /^\/api\/citas\/getcitasfecha\/.*/,
-                /^\/api\/citas\/exelgeneral\/.*/,
-                /^\/api\/donacion\/savedonacion\/?$/,
-                /^\/api\/donacion\/validate\/[^/]+$/ // <- acepta /validate/loquesea
+                '/api/user/login',
+                '/api/citas/getcitasfecha/',
+                '/api/citas/exelgeneral/',
+                '/api/donacion/savedonacion/',
+                '/api/donacion/validate/' 
             ];
-
-            const isPublic = publicPaths.some(regex => regex.test(req.originalUrl));
+            const isPublic = publicPaths.some(path => req.originalUrl.startsWith(path));
             if (isPublic) {
-                return next();
+                return next(); 
             }
-
-            return verifyToken(req, res, next);
+            return verifyToken(req, res, next); 
         });
 
     }

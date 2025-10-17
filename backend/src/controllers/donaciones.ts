@@ -168,10 +168,9 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
 
 export const validateToken  = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { folio } = req.params;
-  
+    const { body } = req;
     const donacionUpdate = await Donaciones.findOne({
-      where: { folio: folio }
+      where: { folio: body.folio }
     });
 
     if (!donacionUpdate) {

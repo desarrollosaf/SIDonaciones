@@ -22,10 +22,12 @@ export class VerificaComponent implements OnInit {
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
-    console.log(token)
+    const data = {
+      folio : token
+    }
     //this.currentUser = this._userService.currentUserValue;
     
-    this._registroService.validate(token).subscribe({
+    this._registroService.validate(data).subscribe({
       next: (response: any) => {
  
         if(response.status == 200){

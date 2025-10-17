@@ -149,9 +149,9 @@ const saveDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.saveDonacion = saveDonacion;
 const validateToken = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { folio } = req.params;
+        const { body } = req;
         const donacionUpdate = yield donaciones_1.default.findOne({
-            where: { folio: folio }
+            where: { folio: body.folio }
         });
         if (!donacionUpdate) {
             return res.status(404).json({
