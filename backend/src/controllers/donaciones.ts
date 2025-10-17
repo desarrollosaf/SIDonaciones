@@ -22,6 +22,26 @@ dp_datospersonales.initModel(sequelizefun);
 dp_fum_datos_generales.initModel(sequelizefun);
 
 
+
+export const getDonacion = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { rfc } = req.params;
+    const donacionExistente = await Donaciones.findOne({
+      where: { rfc: rfc }
+    });
+    console.log(donacionExistente);
+     if (donacionExistente) {
+      
+      return res.status(200).json(donacionExistente);
+    } else {
+      return res.status(200).json([]);
+    }
+  } catch (error) {
+    console.error('Error al consultar el registro:', error);
+    return res.status(500).json({ msg: 'Error interno del servidor' });
+  }
+};
+
 export const saveDonacion = async (req: Request, res: Response): Promise<any> => {
   try {
     const { body } = req;

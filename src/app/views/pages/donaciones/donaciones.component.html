@@ -1,5 +1,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
+
 <div class="row">
   <div class="col-md-12 stretch-card">
     <div class="card">
@@ -15,7 +16,6 @@
                 </div>
                 <div class="card-body">
                   <form [formGroup]="registroForm" (ngSubmit)="enviardatos()">
-                    <!-- Primera fila: Nombre completo y Cantidad -->
                     <div class="row mb-3">
                       <div class="col-12 col-sm-6">
                         <label class="form-label fw-bold">Nombre completo:</label>
@@ -47,8 +47,6 @@
                         </div>
                       </div>
                     </div>
-
-                    <!-- Segunda fila: Correo y Confirmar Correo -->
                     <div class="row mb-3">
                       <div class="col-12 col-sm-6">
                         <label for="correo" class="form-label fw-semibold">Correo*:</label>
@@ -88,8 +86,6 @@
                         </div>
                       </div>
                     </div>
-
-                    <!-- Tercera fila: Teléfono y Confirmar Teléfono -->
                     <div class="row mb-3">
                       <div class="col-12 col-sm-6">
                         <label for="telefono" class="form-label fw-semibold">Teléfono*:</label>
@@ -131,13 +127,11 @@
                       </div>
                     </div>
 
-                    <!-- Botón Enviar centrado con animación -->
                     <div class="d-flex justify-content-center mt-4">
                       <button type="submit" class="submit-anim-btn" [disabled]="registroForm.invalid || isSubmitting"
                         [ngClass]="{ animating: isSubmitting }">
                         <span *ngIf="!isSubmitting">Enviar</span>
 
-                        <!-- SVG check (aparece al final de la animación) -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                           <path d="M0 11c2.761.575 6.312 1.688 9 3.438 
              3.157-4.23 8.828-8.187 15-11.438
@@ -156,10 +150,40 @@
         <div class="container">
           <div class="row w-100 mx-0 auth-page">
             <div class="mx-auto">
-
               <h3 class="text-center mb-4">Mi donación</h3>
-
-
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                  <thead>
+                    <tr>
+                      <th class="text-center">Folio</th>
+                      <th class="text-center">Nombre</th>
+                      <th class="text-center">Correo</th>
+                      <th class="text-center">Teléfono</th>
+                      <th class="text-center">Cantidad</th>
+                      <th class="text-center">PDF</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="table-active">
+                      <td class="text-center">{{ datosDona.folio }}</td>
+                      <td class="text-center">{{ nombreCompleto }}</td>
+                      <td class="text-center">{{ datosDona.correo }}</td>
+                      <td class="text-center">{{ datosDona.telefono }}</td>
+                      <td class="text-center">$ {{ datosDona.cantidad }}</td>
+                      <td class="text-center">
+                        <ng-container *ngIf="datosDona.estatus == 1; else noDisponible">
+                          <a [href]="" target="_blank" title="Ver PDF">
+                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                          </a>
+                        </ng-container>
+                        <ng-template #noDisponible>
+                          <span class="text-muted">No disponible</span>
+                        </ng-template>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
             </div>
           </div>

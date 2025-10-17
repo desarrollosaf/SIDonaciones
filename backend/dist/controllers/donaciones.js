@@ -12,6 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+
+exports.saveDonacion = exports.getDonacion = void 0;
 exports.validateToken = exports.saveDonacion = void 0;
 exports.generarPDFBuffer = generarPDFBuffer;
 const donaciones_1 = __importDefault(require("../models/donaciones"));
@@ -27,6 +29,26 @@ const pdfkit_1 = __importDefault(require("pdfkit"));
 const fs_1 = __importDefault(require("fs"));
 dp_datospersonales_1.dp_datospersonales.initModel(fun_1.default);
 dp_fum_datos_generales_1.dp_fum_datos_generales.initModel(fun_1.default);
+const getDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { rfc } = req.params;
+        const donacionExistente = yield donaciones_1.default.findOne({
+            where: { rfc: rfc }
+        });
+        console.log(donacionExistente);
+        if (donacionExistente) {
+            return res.status(200).json(donacionExistente);
+        }
+        else {
+            return res.status(200).json([]);
+        }
+    }
+    catch (error) {
+        console.error('Error al consultar el registro:', error);
+        return res.status(500).json({ msg: 'Error interno del servidor' });
+    }
+});
+exports.getDonacion = getDonacion;
 const saveDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { body } = req;
