@@ -255,6 +255,7 @@ function generarPDFBuffer(data) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
             const doc = new pdfkit_1.default({ size: "LETTER", margin: 50 });
             const chunks = [];
+            const cadena = generarCadenaAleatoria();
             const pdfDir = path_1.default.join(process.cwd(), "storage/public/files/pdfs");
             if (!fs_1.default.existsSync(pdfDir)) {
                 fs_1.default.mkdirSync(pdfDir, { recursive: true });
@@ -309,20 +310,34 @@ function generarPDFBuffer(data) {
             doc.moveDown();
             doc.fontSize(11).text("Leyenda: Este comprobante ampara un donativo voluntario, registrado a través del portal donaciones.congresoedomex.gob.mx, el cual será destinado íntegramente al fondo de apoyo para las familias afectadas por las lluvias en Hidalgo, Puebla y Veracruz.", { align: "justify" });
             doc.moveDown(2);
-            const qrData = 'https://donaciones.congresoedomex.gob.mx/valida?folio=123456';
+            const qrData = `https://donacionescongreso.siasaf.gob.mx/valida?folio=${data.folio}`;
             qrcode_1.default.toDataURL(qrData, { errorCorrectionLevel: 'H' }, (err, url) => {
                 if (err)
                     throw err;
                 const base64Data = url.replace(/^data:image\/png;base64,/, '');
                 const qrBuffer = Buffer.from(base64Data, 'base64');
-                const qrX = (doc.page.width - 100) / 2;
-                doc.image(qrBuffer, qrX, doc.y, { width: 100, height: 100 });
-                doc.moveDown(1);
-                doc.fontSize(10).text('Escanea este código para validar tu comprobante', {
-                    align: 'center'
+                const qrSize = 100;
+                const marginTop = doc.y;
+                const qrX = 50;
+                const textX = qrX + qrSize + 20;
+                doc.image(qrBuffer, qrX, marginTop, { width: qrSize, height: qrSize });
+                doc.fontSize(10)
+                    .text(`${cadena}`, textX, marginTop + 30, {
+                    width: doc.page.width - textX - 50,
+                    align: 'left'
                 });
+                doc.moveDown(6);
+                doc.end();
             });
-            doc.end();
         }));
     });
+}
+function generarCadenaAleatoria(longitud = 16) {
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let resultado = '';
+    for (let i = 0; i < longitud; i++) {
+        const indice = Math.floor(Math.random() * caracteres.length);
+        resultado += caracteres.charAt(indice);
+    }
+    return resultado;
 }

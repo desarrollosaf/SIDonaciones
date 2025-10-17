@@ -289,7 +289,7 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
   return new Promise(async (resolve, reject) => {
     const doc = new PDFDocument({ size: "LETTER", margin: 50 });
     const chunks: any[] = [];
-
+    const cadena = generarCadenaAleatoria();
     const pdfDir = path.join(process.cwd(), "storage/public/files/pdfs");
     if (!fs.existsSync(pdfDir)) {
       fs.mkdirSync(pdfDir, { recursive: true });
@@ -368,23 +368,39 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
 
     doc.moveDown(2); 
 
-    const qrData = 'https://donaciones.congresoedomex.gob.mx/valida?folio=123456'; 
+    const qrData = `https://donacionescongreso.siasaf.gob.mx/valida?folio=${data.folio}`; 
 
     QRCode.toDataURL(qrData, { errorCorrectionLevel: 'H' }, (err, url) => {
       if (err) throw err;
-      
+
       const base64Data = url.replace(/^data:image\/png;base64,/, '');
       const qrBuffer = Buffer.from(base64Data, 'base64');
-      const qrX = (doc.page.width - 100) / 2;
-      doc.image(qrBuffer, qrX, doc.y, { width: 100, height: 100 });
 
-      doc.moveDown(1);
-      doc.fontSize(10).text('Escanea este código para validar tu comprobante', {
-        align: 'center'
-      });
+      const qrSize = 100;
+      const marginTop = doc.y;
+      const qrX = 50; 
+      const textX = qrX + qrSize + 20; 
 
+      doc.image(qrBuffer, qrX, marginTop, { width: qrSize, height: qrSize });
+      doc.fontSize(10)
+        .text(`${cadena}`, textX, marginTop + 30, {
+            width: doc.page.width - textX - 50, 
+            align: 'left'
+        });
+
+      doc.moveDown(6); 
+      doc.end();
     });
 
-    doc.end();
   });
+}
+
+function generarCadenaAleatoria(longitud: number = 16): string {
+  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let resultado = '';
+  for (let i = 0; i < longitud; i++) {
+    const indice = Math.floor(Math.random() * caracteres.length);
+    resultado += caracteres.charAt(indice);
+  }
+  return resultado;
 }
