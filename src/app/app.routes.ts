@@ -45,5 +45,10 @@ export const routes: Routes = [
     path: 'error/:type',
     loadComponent: () => import('./views/pages/error/error.component').then(c => c.ErrorComponent)
   },
+  {
+    path: 'registro/verifica',
+    canActivateChild: [authGuard],
+    loadComponent: () => import('./views/pages/verifica/verifica.component').then(c => c.VerificaComponent)
+  },
   { path: '**', redirectTo: 'error/404', pathMatch: 'full' }
 ];

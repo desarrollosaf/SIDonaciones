@@ -208,7 +208,7 @@
                       <td class="text-center">
                         <ng-container *ngIf="datosDona.estatus == 1; else noDisponible">
                          <a [href]="'/backend/' + datosDona.path" target="_blank" title="Ver PDF">
-                            Ver PDF
+                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
                           </a>
                         </ng-container>
                         <ng-template #noDisponible>
