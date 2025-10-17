@@ -12,9 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-
-exports.saveDonacion = exports.getDonacion = void 0;
-exports.validateToken = exports.saveDonacion = void 0;
+exports.validateToken = exports.saveDonacion = exports.getDonacion = void 0;
 exports.generarPDFBuffer = generarPDFBuffer;
 const donaciones_1 = __importDefault(require("../models/donaciones"));
 const dp_fum_datos_generales_1 = require("../models/fun/dp_fum_datos_generales");
