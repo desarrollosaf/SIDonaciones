@@ -2,9 +2,9 @@ import { MenuItem } from './menu.model';
 
 export const MENU: MenuItem[] = [
   {
-    label: 'Citas',
+    label: 'Registro',
     icon: 'home',
-    link: '/citas',
+    link: '/donacion',
     roles: ['usuario'],
   },
   {
