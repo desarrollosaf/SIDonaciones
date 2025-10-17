@@ -165,13 +165,12 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
   }
 };
 
-
-export const validateToken = async (req: Request, res: Response): Promise<any> => {
+export const validateToken  = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { body } = req;
+    const { rfc } = req.params;
   
     const donacionUpdate = await Donaciones.findOne({
-      where: { rfc: body.rfc }
+      where: { rfc: rfc }
     });
 
     if (!donacionUpdate) {
