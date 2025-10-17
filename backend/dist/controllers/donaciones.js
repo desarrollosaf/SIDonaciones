@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveDonacion = void 0;
+exports.validateToken = exports.saveDonacion = void 0;
 exports.generarPDFBuffer = generarPDFBuffer;
 const donaciones_1 = __importDefault(require("../models/donaciones"));
 const dp_fum_datos_generales_1 = require("../models/fun/dp_fum_datos_generales");
@@ -127,6 +127,33 @@ const saveDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.saveDonacion = saveDonacion;
+const validateToken = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { body } = req;
+        const donacionUpdate = yield donaciones_1.default.findOne({
+            where: { rfc: body.rfc }
+        });
+        if (!donacionUpdate) {
+            return res.status(404).json({
+                status: 404,
+                msg: 'Donación no encontrada para ese RFC'
+            });
+        }
+        yield donacionUpdate.update({ estatus: 1 });
+        return res.status(200).json({
+            status: 200,
+            msg: 'Éxito'
+        });
+    }
+    catch (error) {
+        console.error('Error validando token:', error);
+        return res.status(500).json({
+            status: 500,
+            msg: 'Error del servidor'
+        });
+    }
+});
+exports.validateToken = validateToken;
 function generarHtmlCorreo(contenidoHtml) {
     return `
     <html>

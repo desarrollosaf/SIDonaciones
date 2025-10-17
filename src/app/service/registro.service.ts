@@ -19,4 +19,8 @@ export class RegistroService {
   saveRegistro(data:any): Observable<string> {
     return this.http.post<string>(`${this.myAppUrl}${this.myAPIUrl}/savedonacion/`,data)
   }
+
+  validate(rfc:any): Observable<string> {
+    return this.http.post<string>(`${this.myAppUrl}${this.myAPIUrl}/validate/`,rfc)
+  }
 }
