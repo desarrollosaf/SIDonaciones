@@ -124,7 +124,7 @@ export class DonacionesComponent {
       next: (response: any) => {
         const firma = {
           user_rfc: 'PLEM62',
-          path: response.donativo.path,
+          path: response.path,
           docI: response.donativo.folio,
           firma_status: '1',
           status_doc: '1',

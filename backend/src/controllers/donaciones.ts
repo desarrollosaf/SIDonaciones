@@ -161,6 +161,7 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
     return res.json({
       status: 200,
       donativo: donacionCre,
+      path: `acuse_${donacionCre?.folio}.pdf`,
       msg: "Donativo registrada correctamente",
     });
 

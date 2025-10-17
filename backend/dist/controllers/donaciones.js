@@ -139,6 +139,7 @@ const saveDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         return res.json({
             status: 200,
             donativo: donacionCre,
+            path: `acuse_${donacionCre === null || donacionCre === void 0 ? void 0 : donacionCre.folio}.pdf`,
             msg: "Donativo registrada correctamente",
         });
     }
