@@ -58,7 +58,8 @@ class Server {
                 '/api/user/login',
                 '/api/citas/getcitasfecha/',
                 '/api/citas/exelgeneral/',
-                '/api/donacion/savedonacion/'
+                '/api/donacion/savedonacion/',
+                '/api/donacion/validate/:rfc'
             ];
             const isPublic = publicPaths.some(path => req.originalUrl.startsWith(path));
             if (isPublic) {

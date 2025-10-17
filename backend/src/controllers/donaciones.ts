@@ -98,7 +98,7 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
       process.env.JWT_SECRET || 'sUP3r_s3creT_ClavE-4321!', 
       { expiresIn: '2d' } 
     );
-    const enlace = `https://donacionescongreso.siasaf.gob.mx/registro/verifica?token=${token}`;
+    const enlace = `https://donacionescongreso.siasaf.gob.mx/registro/verifica?token=${donacionCreate.folio}`;
 
     (async () => {
       try {
@@ -168,10 +168,10 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
 
 export const validateToken  = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { rfc } = req.params;
+    const { folio } = req.params;
   
     const donacionUpdate = await Donaciones.findOne({
-      where: { rfc: rfc }
+      where: { folio: folio }
     });
 
     if (!donacionUpdate) {

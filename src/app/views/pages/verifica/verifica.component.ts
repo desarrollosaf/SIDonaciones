@@ -25,7 +25,7 @@ export class VerificaComponent implements OnInit {
     console.log(token)
     //this.currentUser = this._userService.currentUserValue;
     
-    /*this._registroService.validate(this.currentUser.rfc).subscribe({
+    this._registroService.validate(token).subscribe({
       next: (response: any) => {
  
         if(response.status == 200){
@@ -83,7 +83,7 @@ export class VerificaComponent implements OnInit {
           console.error('Error del servidor:', msg);
         }
       }
-    });*/
+    });
 
   }
 }

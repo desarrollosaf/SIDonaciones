@@ -88,7 +88,7 @@ const saveDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             email: body.correo,
             userId: body.rfc,
         }, process.env.JWT_SECRET || 'sUP3r_s3creT_ClavE-4321!', { expiresIn: '2d' });
-        const enlace = `https://donacionescongreso.siasaf.gob.mx/registro/verifica?token=${token}`;
+        const enlace = `https://donacionescongreso.siasaf.gob.mx/registro/verifica?token=${donacionCreate.folio}`;
         (() => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const meses = [
@@ -149,9 +149,9 @@ const saveDonacion = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.saveDonacion = saveDonacion;
 const validateToken = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { rfc } = req.params;
+        const { folio } = req.params;
         const donacionUpdate = yield donaciones_1.default.findOne({
-            where: { rfc: rfc }
+            where: { folio: folio }
         });
         if (!donacionUpdate) {
             return res.status(404).json({
