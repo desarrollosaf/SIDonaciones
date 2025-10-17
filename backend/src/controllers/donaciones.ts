@@ -165,6 +165,40 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
   }
 };
 
+
+export const validateToken = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { body } = req;
+  
+    const donacionUpdate = await Donaciones.findOne({
+      where: { rfc: body.rfc }
+    });
+
+    if (!donacionUpdate) {
+      return res.status(404).json({
+        status: 404,
+        msg: 'Donación no encontrada para ese RFC'
+      });
+    }
+
+    await donacionUpdate.update({ estatus: 1 });
+
+    return res.status(200).json({
+      status: 200,
+      msg: 'Éxito'
+    });
+
+
+  } catch (error) {
+    console.error('Error validando token:', error);
+    return res.status(500).json({
+      status: 500,
+      msg: 'Error del servidor'
+    });
+  }
+};
+
+
 function generarHtmlCorreo(contenidoHtml: string): string {
   return `
     <html>
