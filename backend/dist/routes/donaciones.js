@@ -6,5 +6,6 @@ const router = (0, express_1.Router)();
 router.post("/api/donacion/savedonacion/", donaciones_1.saveDonacion);
 router.get("/api/donacion/getdonacion/:rfc", donaciones_1.getDonacion);
 router.post("/api/donacion/validate/", donaciones_1.validateToken);
-
+router.get("/api/donacion/getall/", donaciones_1.getAll);
+router.get("/api/donacion/getExcelD/", donaciones_1.getExcelD);
 exports.default = router;

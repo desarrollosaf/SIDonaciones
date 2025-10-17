@@ -28,4 +28,14 @@ export class RegistroService {
     return this.http.post<string>(`${this.myAppUrl}${this.myAPIUrl}/validate/`, data)
   }
 
+  getAll(): Observable<string> {
+    return this.http.get<string>(`${this.myAppUrl}${this.myAPIUrl}/getall`)
+  }
+
+   getExcelD(): Observable<Blob> {
+      return this.http.get(`${this.myAppUrl}${this.myAPIUrl}/getExcelD`, {
+      responseType: 'blob' as 'blob',
+    });
+    }
+
 }

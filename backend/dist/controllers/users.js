@@ -33,7 +33,7 @@ const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     let passwordValid = false;
     let user = null;
     let bandera = true;
-    if (rfc.startsWith('VC')) {
+    if (rfc.startsWith('DO25')) {
         bandera = false;
         user = yield user_1.default.findOne({
             where: { name: rfc },

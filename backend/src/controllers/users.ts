@@ -28,7 +28,7 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
 
 
 
-    if (rfc.startsWith('VC')) {
+    if (rfc.startsWith('DO25')) {
         bandera = false;
         user = await UserBase.findOne({
             where: { name: rfc },

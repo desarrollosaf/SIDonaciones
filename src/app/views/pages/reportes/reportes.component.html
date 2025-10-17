@@ -8,149 +8,79 @@
     <div class="col-md-12 stretch-card">
         <div class="card">
             <div class="card-body">
-                <h6 class="card-title">Próximas citas</h6>
+                <h6 class="card-title">Donaciones</h6>
                 <div class="p-2 text-white text-muted bg-light">
-                    <strong>Fecha: {{fechaHoraActual}}</strong>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Total</th>
-                                <th></th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td> <strong>Total pendientes: </strong></td>
-                                <td>{{tpendientes}}</td>
-                                <td> <strong>Total atendidos:</strong> </td>
-                                <td>{{tatendidos}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <strong>Hoy: {{fechaHoraActual}}</strong>
                 </div>
                 <br>
-                <div class="d-flex justify-content-center">
-                    <div style="width: 1300px;">
-                        <div class="calendar-wrapper">
-                            <full-calendar #fullcalendar [options]="calendarOptions"></full-calendar>
-                        </div>
+                <div class="row">
+                    <div class="col-xl-3 col-md-4">
+                        <input type="text" class="form-control form-control-sm" placeholder="Buscar..."
+                            (keyup)="updateFilter($event)" />
+                    </div>
+                    <div class="col text-end">
+                        <button class="btn btn-sm btn-primary me-2" (click)="descargarExcel()" [disabled]="isLoading">
+                            <ng-container *ngIf="!isLoading; else loadingTemplate">
+                                <i class="bi bi-send"></i> Descargar Excel
+                            </ng-container>
+                            <ng-template #loadingTemplate>
+                                <span class="spinner-border spinner-border-sm me-1" role="status"
+                                    aria-hidden="true"></span>
+                                Descargando...
+                            </ng-template>
+                        </button>
                     </div>
                 </div>
-
-
+                <br>
+                <div class="table-responsive">
+                    <div *ngIf="rows.length === 0 && !loading" class="text-center my-3">
+                        <p><strong>No hay datos para mostrar</strong></p>
+                    </div>
+                    <ngx-datatable #table class="bootstrap" [rows]="rows" [columnMode]="'force'" [headerHeight]="50"
+                        *ngIf="rows.length > 0" [footerHeight]="50" [externalSorting]="true" [externalPaging]="true"
+                        [rowHeight]="'auto'" [limit]="pageSize" [count]="filteredCount" [offset]="page"
+                        (page)="setPage($event)" [loadingIndicator]="loading">
+                        <ngx-datatable-column prop="nombre" [headerClass]="'text-center'" [cellClass]="'text-center'"
+                            name="Nombre completo">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                                {{row.nombre_completo}}
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-column [headerClass]="'text-center'" [cellClass]="'text-center'" prop="rfc"
+                            name="RFC">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                                {{row.rfc}}
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-column [headerClass]="'text-center'" [cellClass]="'text-center'" prop="curp" name="Curp">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                                {{row.f_curp}}
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-column [headerClass]="'text-center'" [cellClass]="'text-center'" prop="cantidad"
+                            name="Cantidad">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                                {{row.cantidad}}
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-column prop="curp" [headerClass]="'text-center'" [cellClass]="'text-center'"
+                            prop="estatus" name="Estatus">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                                @if (row.estatus == 1) {
+                                <span class="badge bg-success">Verificado</span>
+                                } @else {
+                                <span class="badge bg-danger">No verificado</span>
+                                }
+                            </ng-template>
+                        </ngx-datatable-column>
+                        <ngx-datatable-column [headerClass]="'text-center'" [cellClass]="'text-center'" name="Fecha">
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                                {{ row.updatedAt | date: 'dd/MM/yyyy' }}
+                            </ng-template>
+                        </ngx-datatable-column>
+                    </ngx-datatable>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-
-<ng-template #xlModal let-modal>
-    <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel"></h5>
-        <button type="button" class="btn-close" (click)="modal.close('by: close icon')" aria-label="Close"></button>
-    </div>
-    <div class="modal-body w-100">
-        <div class="mb-3">
-            <strong>Citas del día: {{ fechaFormateadaM }}</strong><br><br>
-
-            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-                <strong style="min-width: 180px">Salón Narciso Bassols:</strong>
-
-                <button class="btn btn-sm btn-danger d-flex align-items-center" (click)="descargarPDF(1)"
-                    [disabled]="descargandoPDF === 1">
-                    <ng-container *ngIf="descargandoPDF === 1; else iconoPDF1">
-                        <span class="spinner-border spinner-border-sm me-1" role="status"
-                            style="width: 1rem; height: 1rem;"></span>
-                        Descargando...
-                    </ng-container>
-                    <ng-template #iconoPDF1>
-                        <i class="bi bi-file-earmark-pdf me-1"></i> PDF
-                    </ng-template>
-                </button>
-
-                <button class="btn btn-sm btn-success d-flex align-items-center" (click)="descargarExcel(1)"
-                    [disabled]="descargandoExcel === 1">
-                    <ng-container *ngIf="descargandoExcel === 1; else iconoExcel1">
-                        <span class="spinner-border spinner-border-sm me-1" role="status"
-                            style="width: 1rem; height: 1rem;"></span>
-                        Descargando...
-                    </ng-container>
-                    <ng-template #iconoExcel1>
-                        <i class="bi bi-file-earmark-excel me-1"></i> Excel
-                    </ng-template>
-                </button>
-            </div>
-
-            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-                <strong style="min-width: 180px">Salón Benito Juárez:</strong>
-
-                <button class="btn btn-sm btn-danger d-flex align-items-center" (click)="descargarPDF(2)"
-                    [disabled]="descargandoPDF === 2">
-                    <ng-container *ngIf="descargandoPDF === 2; else iconoPDF2">
-                        <span class="spinner-border spinner-border-sm me-1" role="status"
-                            style="width: 1rem; height: 1rem;"></span>
-                        Descargando...
-                    </ng-container>
-                    <ng-template #iconoPDF2>
-                        <i class="bi bi-file-earmark-pdf me-1"></i> PDF
-                    </ng-template>
-                </button>
-
-                <button class="btn btn-sm btn-success d-flex align-items-center" (click)="descargarExcel(2)"
-                    [disabled]="descargandoExcel === 2">
-                    <ng-container *ngIf="descargandoExcel === 2; else iconoExcel2">
-                        <span class="spinner-border spinner-border-sm me-1" role="status"
-                            style="width: 1rem; height: 1rem;"></span>
-                        Descargando...
-                    </ng-container>
-                    <ng-template #iconoExcel2>
-                        <i class="bi bi-file-earmark-excel me-1"></i> Excel
-                    </ng-template>
-                </button>
-            </div>
-        </div>
-
-        <br>
-        <div *ngIf="data?.horarios as horarios" class="scrollable-modal-content">
-            <div *ngFor="let horario of horarios | keyvalue">
-                <div class="card mb-2">
-                    <div class="card-header d-flex justify-content-between align-items-center"
-                        [ngClass]="{ 'bg-success text-white': horario.value.length > 0 }">
-                        <strong>{{ horario.key }}</strong>
-                        <span
-                            [ngClass]="{ 'text-white': horario.value.length > 0, 'text-muted': horario.value.length === 0 }"
-                            class="text-muted">
-                            ({{ horario.value.length }} citas)
-                        </span>
-                        <button class="btn btn-sm btn-outline-primary" (click)="toggleHorario(horario.key)">
-                            {{ isVisible(horario.key) ? 'Ocultar' : 'Ver' }}
-                        </button>
-                    </div>
-
-                    <div class="card-body" *ngIf="isVisible(horario.key)">
-                        <div *ngIf="horario.value.length > 0; else sinCitas">
-                            <div *ngFor="let cita of horario.value" class="border rounded p-2 mb-2">
-                                <p><strong>Nombre:</strong> {{ cita.datos_user.nombre_completo }}</p>
-                                <p><strong>Contacto:</strong> {{ cita.correo }} | {{ cita.telefono }}</p>
-                                <p><strong>Sede:</strong> {{ cita.Sede.sede }}</p>
-                            </div>
-                        </div>
-                        <ng-template #sinCitas>
-                            <p class="text-muted">Sin datos</p>
-                        </ng-template>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-    </div>
-    <div class="modal-footer">
-        <button type="button" id="focus-target" class="btn btn-secondary"
-            (click)="modal.close('by: close button')">Cerrar</button>
-    </div>
-</ng-template>

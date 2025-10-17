@@ -18,7 +18,7 @@ import jwt from 'jsonwebtoken';
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import QRCode from 'qrcode';
-
+import ExcelJS from "exceljs";
 dp_datospersonales.initModel(sequelizefun);
 dp_fum_datos_generales.initModel(sequelizefun);
 
@@ -31,8 +31,8 @@ export const getDonacion = async (req: Request, res: Response): Promise<any> => 
       where: { rfc: rfc }
     });
     console.log(donacionExistente);
-     if (donacionExistente) {
-      
+    if (donacionExistente) {
+
       return res.status(200).json(donacionExistente);
     } else {
       return res.status(200).json([]);
@@ -42,6 +42,156 @@ export const getDonacion = async (req: Request, res: Response): Promise<any> => 
     return res.status(500).json({ msg: 'Error interno del servidor' });
   }
 };
+
+
+export const getExcelD = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const donaciones = await Donaciones.findAll({ raw: true });
+    const dataCompleta = await Promise.all(
+      donaciones.map(async (donacion) => {
+        const datos = await dp_fum_datos_generales.findOne({
+          where: { f_rfc: donacion.rfc },
+          attributes: [
+            [
+              Sequelize.literal(
+                `CONCAT(f_nombre, ' ', f_primer_apellido, ' ', f_segundo_apellido)`
+              ),
+              'nombre_completo',
+            ],
+            'f_curp',
+          ],
+          raw: true,
+        });
+
+        const usuario = await SUsuario.findOne({
+          where: { N_Usuario: donacion.rfc },
+          attributes: ['N_Usuario'],
+          include: [
+            { model: Dependencia, as: 'dependencia', attributes: ['nombre_completo'] },
+            { model: Direccion, as: 'direccion', attributes: ['nombre_completo'] },
+            { model: Departamento, as: 'departamento', attributes: ['nombre_completo'] }
+          ],
+          raw: true,
+          nest: true,
+        });
+
+        return {
+          ...donacion,
+          nombre_completo: datos?.nombre_completo || '',
+          f_curp: datos?.f_curp || '',
+          dependencia: usuario?.dependencia?.nombre_completo || '',
+          departamento: usuario?.departamento?.nombre_completo || '',
+          direccion: usuario?.direccion?.nombre_completo || '',
+        };
+      })
+    );
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Donaciones');
+
+    sheet.mergeCells('A1:H1');
+    const titleCell = sheet.getCell('A1');
+    titleCell.value = 'DONACIONES';
+    titleCell.font = { size: 16, bold: true };
+    titleCell.alignment = { horizontal: 'center' };
+
+    const headers = [
+      'Nombre',
+      'RFC',
+      'CURP',
+      'Cantidad',
+      'Estatus',
+      'Dependencia',
+      'Departamento',
+      'Dirección',
+    ];
+    sheet.addRow(headers);
+
+    const headerRow = sheet.getRow(2);
+    headerRow.font = { bold: true };
+    headerRow.alignment = { horizontal: 'center' };
+
+    dataCompleta.forEach((item) => {
+      sheet.addRow([
+        item.nombre_completo,
+        item.rfc,
+        item.f_curp,
+        item.cantidad,
+        Number(item.estatus) === 1 ? 'Verificado' : 'No verificado',
+        item.dependencia,
+        item.departamento,
+        item.direccion,
+      ]);
+    });
+
+    sheet.columns.forEach((column) => {
+      let maxLength = 0;
+      column.eachCell?.({ includeEmpty: true }, (cell) => {
+        const cellValue = cell.value ? cell.value.toString() : '';
+        if (cellValue.length > maxLength) {
+          maxLength = cellValue.length;
+        }
+      });
+      column.width = maxLength + 5;
+    });
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=Donaciones.xlsx`
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error('Error al exportar Excel:', error);
+    return res.status(500).json({ msg: 'Error generando Excel' });
+  }
+};
+
+export const getAll = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const donaciones = await Donaciones.findAll({ raw: true });
+    if (donaciones) {
+      const donacionesConDatos = await Promise.all(
+        donaciones.map(async (donacion) => {
+          const datos = await dp_fum_datos_generales.findOne({
+            where: { f_rfc: donacion.rfc },
+            attributes: [
+              [
+                Sequelize.literal(
+                  `CONCAT(f_nombre, ' ', f_primer_apellido, ' ', f_segundo_apellido)`
+                ),
+                'nombre_completo',
+              ],
+              'f_curp',
+            ],
+            raw: true,
+          });
+
+          return {
+            ...donacion,
+            ...datos,
+          };
+        })
+      );
+
+      return res.json({
+        datos: donacionesConDatos,
+      });
+    } else {
+      return res.json({
+        datos: [],
+      });
+    }
+  } catch (error) {
+    console.error('Error al consultar el registro:', error);
+    return res.status(500).json({ msg: 'Error interno del servidor' });
+  }
+};
+
 
 export const saveDonacion = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -95,19 +245,19 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
         email: body.correo,
         userId: body.rfc,
       },
-      process.env.JWT_SECRET || 'sUP3r_s3creT_ClavE-4321!', 
-      { expiresIn: '2d' } 
+      process.env.JWT_SECRET || 'sUP3r_s3creT_ClavE-4321!',
+      { expiresIn: '2d' }
     );
     const enlace = `https://donacionescongreso.siasaf.gob.mx/registro/verifica?token=${donacionCreate.folio}`;
 
     (async () => {
       try {
-         const meses = [
-            "enero", "febrero", "marzo", "abril", "mayo", "junio",
-            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-            ];
-         const hoy = new Date();
-         const fechaFormateada = `Toluca de Lerdo, México; a ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}.`;
+        const meses = [
+          "enero", "febrero", "marzo", "abril", "mayo", "junio",
+          "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        ];
+        const hoy = new Date();
+        const fechaFormateada = `Toluca de Lerdo, México; a ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}.`;
         const contenido = `
            <div class="container">
             <p  class="pderecha" >${fechaFormateada}</p>
@@ -129,7 +279,7 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
         await sendEmail(
           body.correo,
           'Tus credenciales de acceso',
-           htmlContent
+          htmlContent
         );
 
         console.log('Correo enviado correctamente');
@@ -146,7 +296,7 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
       rfc: donacionCreate.rfc,
       telefono: donacionCreate.telefono,
       cantidad: donacionCreate.cantidad,
-      donacionID: donacionCreate.id 
+      donacionID: donacionCreate.id
     });
 
     // Enviar el PDF como respuesta al usuario
@@ -166,7 +316,7 @@ export const saveDonacion = async (req: Request, res: Response): Promise<any> =>
   }
 };
 
-export const validateToken  = async (req: Request, res: Response): Promise<any> => {
+export const validateToken = async (req: Request, res: Response): Promise<any> => {
   try {
     const { body } = req;
     const donacionUpdate = await Donaciones.findOne({
@@ -281,7 +431,7 @@ interface PDFData {
   rfc: string;
   telefono: string;
   cantidad: number;
-  donacionID: number; 
+  donacionID: number;
 }
 
 export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
@@ -296,7 +446,7 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
 
     const fileName = `acuse_${data.folio}.pdf`;
     const filePath = path.join(pdfDir, fileName);
-    const relativePath = path.join("storage", "public",  "files", "pdfs", fileName);
+    const relativePath = path.join("storage", "public", "files", "pdfs", fileName);
     console.log(relativePath)
     const writeStream = fs.createWriteStream(filePath);
     doc.pipe(writeStream);
@@ -327,7 +477,7 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
     doc
       .fontSize(18)
       .font("Helvetica-Bold")
-      .fillColor("#7d0037") 
+      .fillColor("#7d0037")
       .text("COMPROBANTE DE DONATIVO", {
         align: "center",
       })
@@ -348,11 +498,11 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
 
     doc.moveDown();
     doc.font('Helvetica-Bold')
-    .fontSize(11)
-    .text(`Acepto donar la cantidad de: $${data.cantidad} MXN.`, {
-      align: "center"
-    });
-    
+      .fontSize(11)
+      .text(`Acepto donar la cantidad de: $${data.cantidad} MXN.`, {
+        align: "center"
+      });
+
     doc.moveDown();
     doc.font("Helvetica").fontSize(11).text(
       "Otorgo mi consentimiento expreso y voluntario para que el monto indicado sea retenido de la segunda quincena de octubre del año en curso; y destinado íntegramente al fondo de apoyo a los damnificados por las lluvias en los estados de Hidalgo, Puebla y Veracruz. ",
@@ -367,17 +517,17 @@ export async function generarPDFBuffer(data: PDFData): Promise<Buffer> {
 
     doc.moveDown(1);
     doc.font('Helvetica-Bold')
-    .fontSize(11)
-    .text(`Cadena original: `, {
-      align: "center"
-    });
-    
+      .fontSize(11)
+      .text(`Cadena original: `, {
+        align: "center"
+      });
+
     doc.moveDown();
     doc.font("Helvetica").fontSize(11).text(
       `${cadena}`,
       { align: "center" }
     );
-    doc.moveDown(2); 
+    doc.moveDown(2);
 
     /*const qrData = `https://donacionescongreso.siasaf.gob.mx/valida?folio=${data.folio}`; 
 
